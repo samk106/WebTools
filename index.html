@@ -1,1 +1,215 @@
-index
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #0a0a0a;
+    --muted: #6b6b6b;
+    --border: #e6e6e6;
+    --tile: #f2f2f2;
+    --pill-bg: #f2f2f2;
+    --hover-border: #0a0a0a;
+    --shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --text: #f5f5f5;
+    --muted: #9a9a9a;
+    --border: #2a2a2a;
+    --tile: #1f1f1f;
+    --pill-bg: #1f1f1f;
+    --hover-border: #f5f5f5;
+    --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .2s, color .2s;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header { padding: 56px 0 40px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  h1 { margin: 0; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .tagline { margin: 12px 0 0; color: var(--muted); font-size: 1.05rem; max-width: 46ch; }
+  .theme-btn {
+    flex: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    font: inherit; font-size: .85rem; font-weight: 500;
+    color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px;
+    cursor: pointer; box-shadow: var(--shadow);
+    transition: border-color .15s;
+  }
+  .theme-btn:hover { border-color: var(--hover-border); }
+
+  /* Sections */
+  section { margin-bottom: 44px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  .count {
+    font-size: .75rem; font-weight: 600; color: var(--muted);
+    background: var(--pill-bg); border-radius: 999px; padding: 2px 10px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+
+  /* Cards */
+  .card {
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    color: inherit; text-decoration: none;
+    transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--hover-border); transform: translateY(-2px); }
+  a.card:focus-visible, .theme-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  .icon {
+    width: 44px; height: 44px; display: grid; place-items: center;
+    font-size: 1.4rem; background: var(--tile); border-radius: 12px;
+  }
+  .card h3 { margin: 0; font-size: 1.02rem; font-weight: 600; }
+  .card p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+  .card-foot { margin-top: auto; }
+  .pill {
+    display: inline-block; font-size: .72rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 999px;
+    background: var(--pill-bg); color: var(--muted);
+  }
+  .card.soon { opacity: .55; cursor: default; }
+
+  footer { border-top: 1px solid var(--border); padding: 24px 0 40px; color: var(--muted); font-size: .85rem; }
+
+  @media (max-width: 520px) {
+    header { padding-top: 32px; }
+    .theme-btn span.label { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div>
+        <h1>Tools Hub</h1>
+        <p class="tagline">Free tools for everyday tech and money work. Each one opens in a new tab.</p>
+      </div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">
+        <span id="themeIcon" aria-hidden="true">🌙</span><span class="label" id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer>
+    <span id="total"></span>
+  </footer>
+</div>
+
+<script>
+  // ===== Edit here: add a tool by adding one object =====
+  // status: 'live' (clickable) or 'soon' (muted, not clickable)
+  const CATEGORIES = ['Tech Tools', 'Financial Tools'];
+
+  const TOOLS = [
+    { name: 'Text Cleaner',          desc: 'Strip odd formatting and clean up pasted text.',        icon: '🧹', category: 'Tech Tools',      url: 'textcleaner.html',        status: 'live' },
+    { name: 'Trello JSON Viewer',    desc: 'Read Trello board exports as organised lists.',         icon: '🗂️', category: 'Tech Tools',      url: 'trello-json-viewer.html', status: 'live' },
+    { name: 'Grok JSON Viewer',      desc: 'Open a Grok backup file as an easy-to-read chat.',      icon: '💬', category: 'Tech Tools',      url: 'grok-json-viewer.html',   status: 'live' },
+    { name: 'Claude JSON Viewer',    desc: 'Open a Claude export file as an easy-to-read chat.',    icon: '🤖', category: 'Tech Tools',      url: 'claude-json-viewer.html', status: 'live' },
+    { name: 'FD Calculator',         desc: 'Work out maturity value and interest on a fixed deposit.', icon: '🏦', category: 'Financial Tools', url: 'fd-calculator.html',      status: 'live' },
+    { name: 'Rental Yield Calculator', desc: 'Compare rent against property price to get your yield.', icon: '🏠', category: 'Financial Tools', url: 'rental-yield-calculator.html', status: 'live' },
+    { name: 'Mileage Calculator',    desc: 'Find your vehicle mileage and fuel cost per km.',       icon: '⛽', category: 'Financial Tools', url: 'mileage-calculator.html', status: 'live' }
+  ];
+  // =====================================================
+
+  const app = document.getElementById('app');
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  function buildCard(t) {
+    const live = t.status !== 'soon';
+    const card = el(live ? 'a' : 'div', 'card' + (live ? '' : ' soon'));
+    if (live) {
+      card.href = t.url;
+      card.target = '_blank';
+      card.rel = 'noopener';
+    }
+    card.appendChild(el('div', 'icon', t.icon));
+
+    const body = el('div');
+    body.appendChild(el('h3', '', t.name));
+    body.appendChild(el('p', '', t.desc));
+    card.appendChild(body);
+
+    const foot = el('div', 'card-foot');
+    foot.appendChild(el('span', 'pill', live ? t.category : 'Coming soon'));
+    card.appendChild(foot);
+    return card;
+  }
+
+  CATEGORIES.forEach(function (cat) {
+    const items = TOOLS.filter(function (t) { return t.category === cat; });
+    if (!items.length) return;
+    const sec = el('section');
+    const head = el('div', 'sec-head');
+    head.appendChild(el('h2', '', cat));
+    head.appendChild(el('span', 'count', String(items.length)));
+    sec.appendChild(head);
+    const grid = el('div', 'grid');
+    items.forEach(function (t) { grid.appendChild(buildCard(t)); });
+    sec.appendChild(grid);
+    app.appendChild(sec);
+  });
+
+  document.getElementById('total').textContent = TOOLS.length + ' tools';
+
+  // ===== Theme toggle (light by default, remembered) =====
+  const root = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+
+  function applyTheme(mode) {
+    if (mode === 'dark') root.setAttribute('data-theme', 'dark');
+    else root.removeAttribute('data-theme');
+    document.getElementById('themeIcon').textContent = mode === 'dark' ? '☀️' : '🌙';
+    document.getElementById('themeLabel').textContent = mode === 'dark' ? 'Light' : 'Dark';
+    btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  let saved = 'light';
+  try { saved = localStorage.getItem('hub-theme') || 'light'; } catch (e) {}
+  applyTheme(saved);
+
+  btn.addEventListener('click', function () {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('hub-theme', next); } catch (e) {}
+  });
+</script>
+</body>
+</html>
