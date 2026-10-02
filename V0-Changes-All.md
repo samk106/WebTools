@@ -1,5 +1,15 @@
 ## HomePage
 
+
+---
+
+# v2
+- Date - 2 Oct 26
+- AI Used - Claude
+#### Changes List
+- Built and added the fd calculator
+- 
+
 ---
 
 # v1
@@ -7,10 +17,6 @@
 - AI Used - Claude
 #### Changes List
 - Built and added the claude json viewer
-- 
-
-
-
 
 ---
 
