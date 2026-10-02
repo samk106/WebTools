@@ -9,6 +9,7 @@
 #### Changes List
 - Built and added the FD Calculator
 - Built and added Rental Yield Calculator
+- Built and added Mileage Calculator
 
 ---
 
