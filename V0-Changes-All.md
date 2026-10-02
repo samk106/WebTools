@@ -7,8 +7,8 @@
 - Date - 2 Oct 26
 - AI Used - Claude
 #### Changes List
-- Built and added the fd calculator
-- 
+- Built and added the FD Calculator
+- Built and added Rental Yield Calculator
 
 ---
 

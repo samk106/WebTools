@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rental Yield Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#fafafa; --surface:#fff; --text:#0a0a0a; --muted:#6b6b6b; --border:#e6e6e6;
+    --tile:#f2f2f2; --pill-bg:#f2f2f2; --hover-border:#0a0a0a; --shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0a0a0a; --surface:#141414; --text:#f5f5f5; --muted:#9a9a9a; --border:#2a2a2a;
+    --tile:#1f1f1f; --pill-bg:#1f1f1f; --hover-border:#f5f5f5; --shadow:none;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; background:var(--bg); color:var(--text);
+    line-height:1.5; -webkit-font-smoothing:antialiased; transition:background .2s,color .2s; }
+  button, input, select { font:inherit; color:inherit; }
+  :focus-visible { outline:2px solid var(--text); outline-offset:2px; }
+
+  .bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+  .back { color:var(--muted); text-decoration:none; font-size:.85rem; font-weight:500; white-space:nowrap; }
+  .back:hover { color:var(--text); }
+  .logo { width:32px; height:32px; border-radius:8px; background:var(--text); color:var(--bg); display:grid; place-items:center; font-size:15px; flex:none; }
+  h1 { margin:0; font-size:1.1rem; font-weight:700; letter-spacing:-.01em; white-space:nowrap; }
+  .pill { display:inline-block; font-size:.72rem; font-weight:600; padding:3px 10px; border-radius:999px; background:var(--pill-bg); color:var(--muted); white-space:nowrap; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; font-size:.85rem; font-weight:500; background:var(--surface); border:1px solid var(--border); border-radius:999px; cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s; white-space:nowrap; }
+  .btn:hover:not(:disabled) { border-color:var(--hover-border); }
+  .btn:disabled { opacity:.4; cursor:default; }
+  .btn[hidden] { display:none; }
+  .btn.icon { width:40px; height:40px; padding:0; justify-content:center; }
+
+  .wrap { max-width:1040px; margin:0 auto; padding:24px; }
+
+  .tabrow { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .tabs { display:flex; align-items:center; gap:4px; padding:3px; background:var(--surface); border:1px solid var(--border); border-radius:999px; min-width:0; }
+  .pin { display:flex; gap:4px; flex:none; padding-right:4px; margin-right:1px; border-right:1px solid var(--border); }
+  .scroll { display:flex; gap:4px; min-width:0; overflow-x:auto; scrollbar-width:none; }
+  .scroll::-webkit-scrollbar { display:none; }
+  .tab { flex:none; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:0; background:none; padding:7px 14px; font-size:.85rem; font-weight:500; border-radius:999px; cursor:pointer; color:var(--muted); }
+  .tab:hover { color:var(--text); }
+  .tab[aria-pressed="true"] { background:var(--text); color:var(--bg); }
+  .tab.add { padding:7px 12px; font-weight:600; }
+  .spacer { flex:1; }
+
+  .panel { display:grid; grid-template-columns:360px 1fr; gap:16px; align-items:start; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
+  .form { display:flex; flex-direction:column; gap:16px; }
+  .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .field label { font-size:.8rem; font-weight:500; color:var(--muted); }
+  input { width:100%; padding:10px 14px; font-size:.95rem; background:var(--bg); border:1px solid var(--border); border-radius:12px; }
+  input:focus { outline:none; border-color:var(--hover-border); }
+  input.err { border-color:var(--text); border-style:dashed; }
+  .affix { position:relative; }
+  .affix span { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+  .affix input { padding-left:30px; }
+  .hint { margin:0; font-size:.78rem; color:var(--muted); }
+
+  .big-lbl { font-size:.85rem; font-weight:500; color:var(--muted); }
+  .big { margin:2px 0 0; font-size:clamp(2rem,5vw,2.9rem); font-weight:800; letter-spacing:-.03em; line-height:1.1; overflow-wrap:anywhere; }
+  .chips { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:20px; }
+  .chip { background:var(--tile); border-radius:12px; padding:12px 14px; }
+  .chip .k { font-size:.75rem; color:var(--muted); font-weight:500; }
+  .chip .v { font-size:1.05rem; font-weight:700; letter-spacing:-.01em; overflow-wrap:anywhere; }
+  .empty { color:var(--muted); font-size:.9rem; margin:16px 0 0; }
+
+  .tw { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { padding:8px 10px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; }
+  th { font-size:.75rem; font-weight:600; color:var(--muted); }
+  tfoot td { font-weight:700; border-bottom:0; }
+  tr.go { cursor:pointer; } tr.go:hover td, tr.go:focus-visible td { background:var(--tile); }
+
+  @media (max-width:820px) {
+    .panel { grid-template-columns:1fr; }
+    .bar { padding:12px 16px; }
+    .wrap { padding:16px; }
+    .back span { display:none; }
+  }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <a class="back" href="index.html">← <span>Tools Hub</span></a>
+    <div class="logo" aria-hidden="true">🏠</div>
+    <h1>Rental Yield Calculator</h1>
+    <span class="pill">Financial Tools</span>
+  </div>
+  <button class="btn icon" id="themeBtn" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
+    <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<div class="wrap">
+  <div class="tabrow">
+    <div class="tabs" id="tabs" role="group" aria-label="Properties"></div>
+    <span class="spacer"></span>
+    <button class="btn" id="delBtn" type="button">Delete</button>
+    <button class="btn" id="clearBtn" type="button">Clear all</button>
+  </div>
+  <div id="view"></div>
+</div>
+
+<script>
+var $ = function (id) { return document.getElementById(id); };
+var KEY = 'rental-yield-state';
+var nf = new Intl.NumberFormat('en-IN', { maximumFractionDigits:2 });
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function mk(name, o) { return Object.assign({ id:uid(), name:name, cost:'', rent:'' }, o || {}); }
+function num(v) { var n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) && n > 0 ? n : 0; }
+function inr(n) { return '₹' + nf.format(Math.round(n * 100) / 100); }
+function pct(n) { return n.toFixed(2) + '%'; }
+function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+var S;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!S || !Array.isArray(S.items) || !S.items.length) S = { items:[mk('Property 1')], active:null };
+if (S.active !== 'all' && !S.items.some(function (f) { return f.id === S.active; })) S.active = S.items[0].id;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function cur() { return S.items.filter(function (f) { return f.id === S.active; })[0]; }
+
+/* ---------- Maths ---------- */
+function calc(f) {
+  var C = num(f.cost), M = num(f.rent), Y = M * 12;
+  var yld = C > 0 ? Y / C * 100 : 0;
+  return { C:C, M:M, Y:Y, yld:yld, payback:Y > 0 && C > 0 ? C / Y : 0 };
+}
+function label(f, i) { return f.name.trim() || 'Property ' + (i + 1); }
+
+/* ---------- Tabs ---------- */
+function renderTabs() {
+  disarm($('delBtn')); disarm($('clearBtn'));
+  var box = $('tabs'); box.innerHTML = '';
+  var pin = el('div', 'pin'), sc = el('div', 'scroll');
+  var all = el('button', 'tab all', 'All properties'); all.type = 'button';
+  all.setAttribute('aria-pressed', S.active === 'all' ? 'true' : 'false');
+  all.onclick = function () { S.active = 'all'; save(); render(); };
+  pin.appendChild(all);
+  var add = el('button', 'tab add', '+'); add.type = 'button'; add.title = 'Add property'; add.setAttribute('aria-label', 'Add property');
+  add.onclick = function () { var f = mk('Property ' + (S.items.length + 1)); S.items.push(f); S.active = f.id; save(); render(); };
+  pin.appendChild(add);
+  S.items.forEach(function (f, i) {
+    var b = el('button', 'tab', label(f, i)); b.type = 'button'; b.dataset.id = f.id;
+    b.setAttribute('aria-pressed', f.id === S.active ? 'true' : 'false');
+    b.onclick = function () { S.active = f.id; save(); render(); };
+    sc.appendChild(b);
+  });
+  box.appendChild(pin); box.appendChild(sc);
+  var on = sc.querySelector('[aria-pressed="true"]'); if (on) on.scrollIntoView({ inline:'nearest', block:'nearest' });
+  $('delBtn').hidden = S.active === 'all';
+  $('delBtn').disabled = S.items.length < 2;
+}
+
+function updateTabLabel() {
+  var f = cur(), i = S.items.indexOf(f), t = $('tabs').querySelector('[data-id="' + f.id + '"]');
+  if (t) t.textContent = label(f, i);
+}
+
+/* Two-step confirm: native confirm() is blocked in sandboxed previews */
+function disarm(btn) { clearTimeout(btn._t); btn._t = null; if (btn._o) btn.textContent = btn._o; }
+function armed(btn, text, fn) {
+  if (btn._t) { disarm(btn); fn(); return; }
+  btn._o = btn.textContent; btn.textContent = text;
+  btn._t = setTimeout(function () { disarm(btn); }, 3000);
+}
+$('delBtn').onclick = function () {
+  if (S.items.length < 2) return;
+  var f = cur(), i = S.items.indexOf(f);
+  armed(this, 'Click again to delete', function () {
+    S.items.splice(i, 1); S.active = S.items[Math.min(i, S.items.length - 1)].id; save(); render();
+  });
+};
+$('clearBtn').onclick = function () {
+  armed(this, 'Click again to clear all', function () {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    var f = mk('Property 1'); S = { items:[f], active:f.id }; render();
+  });
+};
+
+/* ---------- Single property view ---------- */
+function field(lbl, id) { var w = el('div', 'field'), l = el('label', '', lbl); l.htmlFor = id; w.appendChild(l); return w; }
+
+function moneyField(f, key, lbl, id, ph) {
+  var w = field(lbl, id), aff = el('div', 'affix'), i = el('input');
+  aff.appendChild(el('span', '', '₹'));
+  i.id = id; i.type = 'text'; i.inputMode = 'decimal'; i.placeholder = ph; i.value = f[key] === '' ? '' : nf.format(num(f[key]));
+  i.oninput = function () { f[key] = i.value; i.classList.toggle('err', /[^0-9.,\s]/.test(i.value)); change(); };
+  i.onblur = function () { var n = num(i.value); f[key] = n ? String(n) : ''; i.value = n ? nf.format(n) : ''; i.classList.remove('err'); save(); };
+  aff.appendChild(i); w.appendChild(aff);
+  return w;
+}
+
+function renderOne() {
+  var f = cur(), v = $('view'); v.innerHTML = '';
+  var panel = el('div', 'panel'), form = el('div', 'card form'), out = el('div', 'card'); out.id = 'out';
+
+  var nm = field('Name', 'f-name'), ni = el('input'); ni.id = 'f-name'; ni.type = 'text'; ni.maxLength = 40; ni.value = f.name; ni.placeholder = 'e.g. 2BHK Sector 70';
+  ni.oninput = function () { f.name = ni.value; save(); updateTabLabel(); };
+  nm.appendChild(ni); form.appendChild(nm);
+
+  form.appendChild(moneyField(f, 'cost', 'Property cost', 'f-cost', '50,00,000'));
+  form.appendChild(moneyField(f, 'rent', 'Monthly rent', 'f-rent', '20,000'));
+  form.appendChild(el('p', 'hint', 'Gross yield: yearly rent as a share of property cost, before tax, maintenance and vacancy.'));
+
+  panel.appendChild(form); panel.appendChild(out); v.appendChild(panel);
+  renderOut();
+}
+
+function change() { save(); renderOut(); }
+
+function chip(k, val) { var c = el('div', 'chip'); c.appendChild(el('div', 'k', k)); c.appendChild(el('div', 'v', val)); return c; }
+
+function renderOut() {
+  var f = cur(), c = calc(f), out = $('out'); out.innerHTML = '';
+  var ready = c.C > 0 && c.M > 0;
+  out.appendChild(el('div', 'big-lbl', 'Gross rental yield'));
+  out.appendChild(el('p', 'big', ready ? pct(c.yld) : '–'));
+
+  var chips = el('div', 'chips');
+  chips.appendChild(chip('Property cost', inr(c.C)));
+  chips.appendChild(chip('Monthly rent', inr(c.M)));
+  chips.appendChild(chip('Yearly rent', inr(c.Y)));
+  chips.appendChild(chip('Rent pays back cost in', ready ? c.payback.toFixed(1) + ' years' : '–'));
+  out.appendChild(chips);
+
+  if (!ready) out.appendChild(el('p', 'empty', 'Enter the property cost and monthly rent to see the yield.'));
+}
+
+/* ---------- All properties view ---------- */
+function renderAll() {
+  var v = $('view'); v.innerHTML = '';
+  var rows = S.items.map(function (f, i) { return { f:f, i:i, c:calc(f) }; });
+  var tC = 0, tY = 0, best = null;
+  rows.forEach(function (r) {
+    tC += r.c.C; tY += r.c.Y;
+    if (r.c.C > 0 && r.c.Y > 0 && (!best || r.c.yld > best.c.yld)) best = r;
+  });
+  var comb = tC > 0 ? tY / tC * 100 : 0;
+
+  var top = el('div', 'card');
+  top.appendChild(el('div', 'big-lbl', 'Combined yield across ' + S.items.length + (S.items.length === 1 ? ' property' : ' properties')));
+  top.appendChild(el('p', 'big', tC > 0 && tY > 0 ? pct(comb) : '–'));
+  var chips = el('div', 'chips');
+  chips.appendChild(chip('Total cost', inr(tC)));
+  chips.appendChild(chip('Total yearly rent', inr(tY)));
+  chips.appendChild(chip('Highest yield', best ? label(best.f, best.i) + ' · ' + pct(best.c.yld) : '–'));
+  top.appendChild(chips); v.appendChild(top);
+
+  var card = el('div', 'card'); card.style.marginTop = '16px';
+  var tw = el('div', 'tw'), t = el('table');
+  t.innerHTML = '<thead><tr><th>Property</th><th>Cost</th><th>Monthly rent</th><th>Yearly rent</th><th>Yield</th></tr></thead>';
+  var tb = el('tbody');
+  rows.forEach(function (r) {
+    var tr = el('tr', 'go'); tr.tabIndex = 0; tr.title = 'Open this property';
+    [label(r.f, r.i), inr(r.c.C), inr(r.c.M), inr(r.c.Y), r.c.C > 0 && r.c.Y > 0 ? pct(r.c.yld) : '–'].forEach(function (x) { tr.appendChild(el('td', '', x)); });
+    var open = function () { S.active = r.f.id; save(); render(); };
+    tr.onclick = open; tr.onkeydown = function (e) { if (e.key === 'Enter') open(); };
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  var tf = el('tfoot'), fr = el('tr');
+  ['Total', inr(tC), '', inr(tY), tC > 0 && tY > 0 ? pct(comb) : '–'].forEach(function (x) { fr.appendChild(el('td', '', x)); });
+  tf.appendChild(fr); t.appendChild(tf); tw.appendChild(t); card.appendChild(tw); v.appendChild(card);
+}
+
+function render() { renderTabs(); if (S.active === 'all') renderAll(); else renderOne(); }
+render();
+
+/* ---------- Theme (same key as Tools Hub) ---------- */
+var root = document.documentElement, tbtn = $('themeBtn');
+function applyTheme(mode) {
+  var dark = mode === 'dark';
+  if (dark) root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme');
+  $('iconMoon').style.display = dark ? 'none' : '';
+  $('iconSun').style.display = dark ? '' : 'none';
+  var l = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  tbtn.setAttribute('aria-label', l); tbtn.title = l;
+}
+var saved = 'light';
+try { saved = localStorage.getItem('hub-theme') || 'light'; } catch (e) {}
+applyTheme(saved);
+tbtn.addEventListener('click', function () {
+  var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('hub-theme', next); } catch (e) {}
+});
+</script>
+</body>
+</html>
