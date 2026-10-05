@@ -3,6 +3,15 @@
 
 ---
 
+# v3
+- Date - 5 Oct 26
+- AI Used - Claude
+#### Changes List
+- Built and added the side by side editor
+- Updated homepage with link to side by side editor
+
+---
+
 # v2
 - Date - 2 Oct 26
 - AI Used - Claude
