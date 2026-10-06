@@ -3,6 +3,15 @@
 
 ---
 
+# v4
+- Date -  Oct 26
+- AI Used - Claude
+#### Changes List
+- Built and added the market tracker
+- Updated homepage with link to market tracker
+
+---
+
 # v3
 - Date - 5 Oct 26
 - AI Used - Claude
