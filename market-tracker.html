@@ -132,6 +132,21 @@
   .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:4px; margin-top:10px; max-height:300px; overflow-y:auto; }
   .grid label { display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:10px; cursor:pointer; font-size:.88rem; }
   .grid label:hover { background:var(--tile); } .grid input { accent-color:var(--text); } .grid .full { opacity:.45; }
+  td.act { white-space:nowrap; }
+  .grip { display:inline-grid; place-items:center; width:26px; height:28px; vertical-align:middle; color:var(--muted); cursor:grab; opacity:0; touch-action:none; transition:opacity .12s; }
+  tr:hover .grip, .grip:focus-visible { opacity:1; }
+  @media (hover:none) { .grip { opacity:1; } }
+  @media (hover:hover) { tr[data-i] { cursor:grab; } tr[data-i] input { cursor:text; } tr[data-i] button { cursor:pointer; } }
+  body.drag-on { user-select:none; -webkit-user-select:none; cursor:grabbing; }
+  tr[data-i] td { transition:transform .16s ease; }
+  tr.ph td { background:var(--tile); color:transparent; border-top:2px dashed var(--muted); border-bottom:2px dashed var(--muted); }
+  tr.ph td:first-child { border-left:2px dashed var(--muted); } tr.ph td:last-child { border-right:2px dashed var(--muted); }
+  tr.ph td * { visibility:hidden; }
+  .ghost { position:fixed; z-index:1000; pointer-events:none; border-radius:10px; overflow:hidden; background:var(--surface); border:1px solid var(--hover-border); box-shadow:0 14px 34px rgba(0,0,0,.28); opacity:.95; transform:scale(1.012); }
+  .ghost table { table-layout:fixed; width:100%; } .ghost td { border-bottom:0; } .ghost .grip { opacity:1; }
+  .imp { margin-bottom:16px; padding:12px 16px; border:1px solid var(--border); border-left:3px solid var(--text); border-radius:12px; background:var(--surface); font-size:.88rem; }
+  .imp[hidden] { display:none; } .imp .row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  @media (prefers-reduced-motion:reduce) { tr[data-i] td { transition:none; } }
   footer { border-top:1px solid var(--border); padding:20px 0 32px; color:var(--muted); font-size:.8rem; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
   @media (max-width:720px) { .gold { grid-template-columns:1fr; } .bar { padding:12px 16px; } .wrap { padding:16px; } .back span { display:none; } }
@@ -201,6 +216,7 @@
       </div>
       <div class="quick" id="quick" aria-label="Quick add"></div>
       <p class="note" id="sMsg" style="margin:12px 0 0">Search by company name or symbol. Press Enter with no result selected to add an exact symbol.</p>
+      <div class="foot"><span class="spacer"></span><button class="btn" id="sEdit" type="button">✎ Edit</button></div>
     </div>
   </section>
 
@@ -246,16 +262,20 @@
     </div>
   </section>
 
+  <div class="imp" id="imp" hidden></div>
   <footer>
     <span>Prices are indicative and may be delayed. Not investment advice.</span>
     <span class="spacer"></span>
+    <button class="btn" id="expBtn" type="button">⬇ Export my lists</button>
+    <button class="btn" id="impBtn" type="button">⬆ Import lists</button>
+    <input type="file" id="impFile" accept=".json,application/json" hidden>
     <button class="btn" id="resetBtn" type="button">Reset my lists</button>
   </footer>
 </div>
 
 <script>
 /* ===== Set this to your Cloudflare Worker address (no trailing slash needed) ===== */
-var WORKER_URL = 'https://divine-butterfly-ebaa.natasha30singh.workers.dev/';
+var WORKER_URL = 'https://divine-butterfly-ebaa.natasha30singh.workers.dev';
 /* ================================================================================ */
 
 var $ = function (id) { return document.getElementById(id); };
@@ -444,7 +464,7 @@ function renderStocks() {
   t.innerHTML = '<thead><tr><th>Symbol</th><th>Price</th><th>Change</th><th>%</th><th></th></tr></thead>';
   var tb = el('tbody');
   S.stocks.forEach(function (s, i) {
-    var d = RES[s], tr = el('tr'), first = el('td', '', s.replace(/\.(NS|BO)$/, ''));
+    var d = RES[s], tr = el('tr'), first = el('td', '', s.replace(/\.(NS|BO)$/, '')); tr.dataset.i = i;
     if (d && !d.err && d.name) first.appendChild(el('span', 'tag', d.name));
     tr.appendChild(first);
     if (!d || d.err) {
@@ -459,10 +479,12 @@ function renderStocks() {
       } else { tr.appendChild(el('td', '', '–')); tr.appendChild(el('td', '', '–')); }
     }
     var act = el('td', 'act');
-    act.appendChild(iconBtn('↑', 'Move up', function () { move(i, -1); }, i === 0));
-    act.appendChild(iconBtn('↓', 'Move down', function () { move(i, 1); }, i === S.stocks.length - 1));
-    act.appendChild(iconBtn('✕', 'Remove ' + s, function () { removeStock(i); }));
-    tr.appendChild(act); tb.appendChild(tr);
+    if (sEdit) {
+      act.appendChild(iconBtn('↑', 'Move up', function () { move(i, -1); }, i === 0));
+      act.appendChild(iconBtn('↓', 'Move down', function () { move(i, 1); }, i === S.stocks.length - 1));
+      act.appendChild(iconBtn('✕', 'Remove ' + s, function () { removeStock(i); }));
+    }
+    addGrip(act); tr.appendChild(act); tb.appendChild(tr);
   });
   t.appendChild(tb); box.appendChild(t);
 }
@@ -726,22 +748,22 @@ async function loadFx() {
 
 function renderCur() {
   var tb = $('curRows'); tb.innerHTML = '';
-  $('curHead').innerHTML = '<tr><th>Currency</th><th>Converted</th><th>Rate</th><th>Change</th>' + (fxEdit ? '<th></th>' : '') + '</tr>';
+  $('curHead').innerHTML = '<tr><th>Currency</th><th>Converted</th><th>Rate</th><th>Change</th>' + '<th></th>' + '</tr>';
   if (!FX) { fxMsg(tb, 4, 'Loading…'); return; }
   if (FX.err) { fxMsg(tb, 4, 'Currency rates are unavailable right now. Try Refresh.'); $('curNote').textContent = ''; return; }
   var base = FX.last[FXS.base] ? FXS.base : 'INR', amt = parseFloat(String(FXS.amt).replace(/,/g, '')) || 0;
-  var rows = FXS.sel.filter(function (c) { return c !== base && FX.last[c]; });
+  var rows = FXS.sel.filter(function (c) { return c !== base && FX.last[c]; }); RV = rows;
   if (!rows.length) fxMsg(tb, 4, 'No currencies selected. Use “Edit currencies”.');
   rows.forEach(function (c, i) {
-    var tr = el('tr'), td = el('td'); td.appendChild(fxCell(c, true)); tr.appendChild(td);
+    var tr = el('tr'), td = el('td'); tr.dataset.i = i; td.appendChild(fxCell(c, true)); tr.appendChild(td);
     [fxFmt(amt * FX.last[c] / FX.last[base], c), '1 ' + c + ' = ' + fxFmt(FX.last[base] / FX.last[c], base), chgText(fxChg(c, base))].forEach(function (x) { tr.appendChild(el('td', '', x)); });
+    var act = el('td', 'act');
     if (fxEdit) {
-      var act = el('td'); act.style.width = '1%';
       var mv = function (d) { var j = FXS.sel.indexOf(c), k = FXS.sel.indexOf(rows[i + d]); FXS.sel[j] = rows[i + d]; FXS.sel[k] = c; saveFx(); render(); };
       act.appendChild(pbtn('↑', 'Move up', function () { mv(-1); }, i === 0));
       act.appendChild(pbtn('↓', 'Move down', function () { mv(1); }, i === rows.length - 1));
-      tr.appendChild(act);
     }
+    addGrip(act); tr.appendChild(act);
     tb.appendChild(tr);
   });
   $('curNote').textContent = rows.length + ' selected · ECB rates for ' + FX.date;
@@ -780,28 +802,28 @@ function pk(p) { return p[0] + '-' + p[1]; }
 function pbtn(txt, label, fn, off) { var b = el('button', 'ib', txt); b.type = 'button'; b.title = label; b.setAttribute('aria-label', label); b.disabled = !!off; b.onclick = fn; return b; }
 function renderPairs() {
   var head = $('pairHead'), tb = $('pairRows'); tb.innerHTML = '';
-  head.innerHTML = '<tr><th>From</th><th>To</th><th>Rate</th><th>Change</th>' + (pEdit ? '<th></th>' : '') + '</tr>';
+  head.innerHTML = '<tr><th>From</th><th>To</th><th>Rate</th><th>Change</th>' + '<th></th>' + '</tr>';
   if (!FX) { fxMsg(tb, 4, 'Loading…'); return; }
   if (FX.err) { fxMsg(tb, 4, 'Currency rates are unavailable right now. Try Refresh.'); $('pairNote').textContent = ''; return; }
-  var list = FXS.pairs;
+  var list = FXS.pairs; PV = [];
   list.forEach(function (p, i) {
     var a = p[0], b = p[1];
     if (!FX.last[a] || !FX.last[b]) return;
-    var rate = fxRate(FX.last, a, b), tr = el('tr'), amt = pAmts[pk(p)] != null ? pAmts[pk(p)] : '1';
+    var rate = fxRate(FX.last, a, b), tr = el('tr'), amt = pAmts[pk(p)] != null ? pAmts[pk(p)] : '1'; PV.push(p); tr.dataset.i = PV.length - 1;
     var t1 = el('td'), inp = el('input', 'amt2'); inp.value = amt; inp.inputMode = 'decimal'; inp.setAttribute('aria-label', 'Amount in ' + a);
     t1.appendChild(inp); t1.appendChild(fxCell(a, false)); tr.appendChild(t1);
     var t2 = el('td'), box = el('span', 'tocell'), val = el('span', '', fxFmt((parseFloat(amt.replace(/,/g, '')) || 0) * rate, b));
     box.appendChild(val); box.appendChild(fxCell(b, false)); t2.appendChild(box); tr.appendChild(t2);
     inp.oninput = function () { pAmts[pk(p)] = inp.value; val.textContent = fxFmt((parseFloat(inp.value.replace(/,/g, '')) || 0) * rate, b); };
     ['1 ' + a + ' = ' + fxFmt(rate, b), chgText(fxChg(a, b))].forEach(function (x) { tr.appendChild(el('td', '', x)); });
+    var act = el('td', 'act');
     if (pEdit) {
-      var act = el('td'); act.style.width = '1%';
       act.appendChild(pbtn('⇄', 'Flip direction', function () { list[i] = [b, a]; saveFx(); renderPairs(); }));
       act.appendChild(pbtn('↑', 'Move up', function () { var x = list[i]; list[i] = list[i - 1]; list[i - 1] = x; saveFx(); renderPairs(); }, i === 0));
       act.appendChild(pbtn('↓', 'Move down', function () { var x = list[i]; list[i] = list[i + 1]; list[i + 1] = x; saveFx(); renderPairs(); }, i === list.length - 1));
       act.appendChild(pbtn('✕', 'Remove pair', function () { list.splice(i, 1); saveFx(); renderPairs(); updateSums(); }));
-      tr.appendChild(act);
     }
+    addGrip(act); tr.appendChild(act);
     tb.appendChild(tr);
   });
   if (!tb.children.length) fxMsg(tb, 4, 'No pairs yet. Use “Edit pairs” to add one.');
@@ -817,6 +839,117 @@ $('padd').onclick = function () {
 };
 $('pairEdit').onclick = function () { pEdit = !pEdit; fxUi(); renderPairs(); };
 fxUi();
+
+
+/* ===== Drag and drop (pointer events: mouse + touch) ===== */
+var RV = [], PV = [], sEdit = false;
+var DOTS = '<svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.4"/><circle cx="9" cy="3" r="1.4"/><circle cx="3" cy="8" r="1.4"/><circle cx="9" cy="8" r="1.4"/><circle cx="3" cy="13" r="1.4"/><circle cx="9" cy="13" r="1.4"/></svg>';
+function addGrip(td) { var g = el('span', 'grip'); g.innerHTML = DOTS; g.title = 'Drag to reorder'; td.appendChild(g); }
+function shift(r, y) { [].forEach.call(r.children, function (td) { td.style.transform = y ? 'translateY(' + y + 'px)' : ''; }); }
+function makeGhost(row, rect) {
+  var g = el('div', 'ghost'), t = el('table'), b = el('tbody'), c = row.cloneNode(true), src = row.children;
+  [].forEach.call(c.children, function (td, i) { td.style.width = src[i].getBoundingClientRect().width + 'px'; td.style.transform = ''; });
+  var si = row.querySelectorAll('input'); [].forEach.call(c.querySelectorAll('input'), function (x, i) { x.value = si[i].value; });
+  c.removeAttribute('data-i'); b.appendChild(c); t.appendChild(b); g.appendChild(t);
+  g.style.left = rect.left + 'px'; g.style.top = rect.top + 'px'; g.style.width = rect.width + 'px';
+  return g;
+}
+function sortable(tb, getArr, rerender) {
+  tb.addEventListener('pointerdown', function (e) {
+    var row = e.target.closest('tr[data-i]'); if (!row || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    var gp = e.target.closest('.grip');
+    if (!gp && e.target.closest('input,select,button,a')) return;          /* typing/clicking is not dragging */
+    if (e.pointerType === 'touch' && !gp) return;                          /* touch: drag by the grip only */
+    var from = +row.dataset.i, y0 = e.clientY, lastY = y0, moving = false, to = from, ghost, off, h, hs, mids, raf = 0;
+    var rows = [].slice.call(tb.querySelectorAll('tr[data-i]'));
+    function start() {
+      moving = true;
+      var rect = row.getBoundingClientRect();
+      mids = rows.map(function (r) { var b = r.getBoundingClientRect(); return b.top + scrollY + b.height / 2; });
+      hs = rows.map(function (r) { return r.getBoundingClientRect().height; });
+      h = hs[from]; off = y0 - rect.top;
+      ghost = makeGhost(row, rect); document.body.appendChild(ghost);
+      row.classList.add('ph'); document.body.classList.add('drag-on');
+    }
+    function layout() {
+      var c = lastY - off + scrollY + h / 2, n = 0, k;
+      mids.forEach(function (m, i) { if (i !== from && m < c) n++; });
+      to = n;
+      rows.forEach(function (r, i) {
+        var y = 0;
+        if (i === from) { if (to > from) for (k = from + 1; k <= to; k++) y += hs[k]; else if (to < from) for (k = to; k < from; k++) y -= hs[k]; }
+        else if (to > from && i > from && i <= to) y = -h;
+        else if (to < from && i >= to && i < from) y = h;
+        shift(r, y);
+      });
+    }
+    function tick() {
+      if (!moving) return;
+      ghost.style.top = (lastY - off) + 'px';
+      var sp = 0; if (lastY < 80) sp = -Math.ceil((80 - lastY) / 6); else if (lastY > innerHeight - 80) sp = Math.ceil((lastY - (innerHeight - 80)) / 6);
+      if (sp) scrollBy(0, sp);
+      layout(); raf = requestAnimationFrame(tick);
+    }
+    function mv(ev) { lastY = ev.clientY; if (!moving && Math.abs(lastY - y0) >= 6) { start(); raf = requestAnimationFrame(tick); } }
+    function up() {
+      document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up);
+      cancelAnimationFrame(raf); document.body.classList.remove('drag-on');
+      if (ghost) ghost.remove();
+      if (moving && to !== from) { var arr = getArr(); arr.splice(to, 0, arr.splice(from, 1)[0]); rerender(); }
+      else { row.classList.remove('ph'); rows.forEach(function (r) { shift(r, 0); }); }
+    }
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+  });
+}
+sortable($('sBody'), function () { return S.stocks; }, function () { save(); render(); });
+sortable($('curRows'), function () { return RV; }, function () { FXS.sel = RV.concat(FXS.sel.filter(function (c) { return RV.indexOf(c) < 0; })); saveFx(); render(); });
+sortable($('pairRows'), function () { return PV; }, function () { FXS.pairs = PV.concat(FXS.pairs.filter(function (p) { return PV.indexOf(p) < 0; })); saveFx(); render(); });
+$('sEdit').onclick = function () { sEdit = !sEdit; this.textContent = sEdit ? '✓ Done' : '✎ Edit'; renderStocks(); };
+
+/* ===== Export / import (replaces this browser's lists) ===== */
+function snapshot() {
+  return { app:'market-tracker', version:1, exported:new Date().toISOString(), unit:S.unit, yields:S.yields.slice(), stocks:S.stocks.slice(),
+    currencies:{ base:FXS.base, amount:String(FXS.amt), selected:FXS.sel.slice() }, pairs:FXS.pairs.map(function (p) { return p.slice(); }) };
+}
+$('expBtn').onclick = function () {
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(snapshot(), null, 2)], { type:'application/json' }));
+  a.download = 'market-tracker-lists.json'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+};
+$('impBtn').onclick = function () { $('impFile').click(); };
+function validate(j) {
+  if (!j || j.app !== 'market-tracker') throw new Error('This file is not a Market Tracker export.');
+  var c = j.currencies || {}, ok = function (x) { return typeof x === 'string' && /^[A-Z]{3}$/.test(x) && (!fxOk() || !!FX.last[x]); };
+  return {
+    unit:UNITS[j.unit] ? j.unit : S.unit,
+    yields:(Array.isArray(j.yields) ? j.yields : []).filter(function (x) { return YIELDS.some(function (y) { return y.s === x; }); }),
+    stocks:(Array.isArray(j.stocks) ? j.stocks : []).filter(function (x) { return typeof x === 'string' && /^[A-Za-z0-9.^=&\-]{1,20}$/.test(x); }).filter(function (x, i, a) { return a.indexOf(x) === i; }).slice(0, MAX_STOCKS),
+    base:ok(c.base) ? c.base : 'INR', amt:typeof c.amount === 'string' ? c.amount.slice(0, 20) : '100',
+    sel:(Array.isArray(c.selected) ? c.selected : []).filter(ok),
+    pairs:(Array.isArray(j.pairs) ? j.pairs : []).filter(function (p) { return Array.isArray(p) && p.length === 2 && ok(p[0]) && ok(p[1]) && p[0] !== p[1]; })
+  };
+}
+$('impFile').onchange = function (e) {
+  var f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  var box = $('imp'), r = new FileReader(); box.hidden = false; box.innerHTML = '';
+  r.onload = function () {
+    try {
+      var d = validate(JSON.parse(r.result));
+      box.appendChild(el('div', '', 'File ready: ' + d.stocks.length + ' stocks, ' + d.yields.length + ' maturities, ' + d.sel.length + ' currencies, ' + d.pairs.length + ' pairs. Importing replaces the lists in this browser.'));
+      var row = el('div', 'row'), go = el('button', 'btn', 'Replace my lists'), no = el('button', 'btn', 'Cancel'); go.type = no.type = 'button';
+      go.onclick = function () {
+        S.unit = d.unit; S.yields = d.yields; S.stocks = d.stocks; save();
+        FXS.base = d.base; FXS.amt = d.amt; FXS.sel = d.sel; FXS.pairs = d.pairs; pAmts = {}; saveFx(); fxUi();
+        syncUnit(); buildYieldMenu(); buildFx(); render();
+        if (configured()) allSymbols().forEach(function (x) { if (!RES[x[0]]) fetchInto(x[0], x[1]); });
+        box.textContent = 'Lists replaced from ' + f.name + '.';
+      };
+      no.onclick = function () { box.hidden = true; };
+      row.appendChild(go); row.appendChild(no); box.appendChild(row);
+    } catch (err) { box.textContent = err instanceof SyntaxError ? 'This file is not valid JSON.' : err.message; }
+  };
+  r.onerror = function () { box.textContent = 'The file could not be read.'; };
+  r.readAsText(f);
+};
 
 /* ---------- Start ---------- */
 syncUnit(); buildYieldMenu(); loadAll();
