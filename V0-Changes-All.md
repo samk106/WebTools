@@ -1,14 +1,15 @@
 ## HomePage
 
 
-Changes in v1a (from v1)
+---
 
-Undo and redo: Ctrl+Z works again, because paste and Clear now go through the browser’s own edit commands. Each pane also has 
-Right pane renamed: “Working copy” is now “Draft”.
-Tool renamed: “Side-by-Side Editor” is now “Split Editor”.
-Sync scroll moved: it’s now in the top bar before the light/dark toggle, as an icon-only button with the label on hover.
-Source limit: the 50,000-character limit is set on the text box, and an oversized paste is trimmed to fit.
-Phone top bar: the “Tech Tools” pill is hidden on narrow screens so the buttons fit.
+# v6
+- Date - 10 Nov 26
+- AI Used - Claude
+#### Changes List
+- Added the cab biz economics calculator
+
+
 
 
 
