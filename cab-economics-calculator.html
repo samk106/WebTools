@@ -49,6 +49,17 @@
   input[type=range]{width:100%;accent-color:var(--fg)}
   input[type=checkbox]{accent-color:var(--fg)}
   .hide{display:none!important}
+  section.closed > :not(.sec-head){display:none}
+  section.closed .sec-hide{display:none!important}
+  section.closed .sec-head{margin-bottom:0!important}
+  section.closed{padding-top:14px;padding-bottom:14px}
+  section.closed .sec-head h2{margin-bottom:0}
+  .sec-head{cursor:pointer}
+  .sec-chev{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:4px;color:var(--mu);font-size:12px;vertical-align:middle;transition:transform .15s;cursor:pointer;border-radius:6px}
+  .sec-chev:hover{background:var(--soft)}
+  section.closed .sec-chev{transform:rotate(-90deg)}
+  .sec-sum{display:none;font-weight:500;color:var(--mu);font-size:12px;margin:2px 0 0 26px;white-space:normal}
+  section.closed .sec-sum{display:block}
   .lbl{display:block;color:var(--mu)}
   .help{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
   .q{width:18px;height:18px;border-radius:50%;border:1px solid var(--bd);background:var(--soft);color:var(--mu);font:inherit;font-size:11px;font-weight:700;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
@@ -82,7 +93,7 @@
 
 <div class="max-w-7xl mx-auto px-4 lg:px-8 pt-5">
   <div class="flex flex-wrap items-center justify-between gap-3">
-    <div class="seg"><button id="tabCalc" class="on" onclick="setView('calc')">Calculator</button><button id="tabCmp" onclick="setView('cmp')">Compare</button></div>
+    <div class="flex items-center gap-2"><div class="seg"><button id="tabCalc" class="on" onclick="setView('calc')">Calculator</button><button id="tabCmp" onclick="setView('cmp')">Compare</button></div><button id="allBtn" class="btn" onclick="toggleAll()">Collapse all</button></div>
     <div id="chips" class="flex flex-wrap items-center gap-2"></div>
   </div>
 </div>
@@ -91,8 +102,8 @@
 <main id="viewCalc" class="max-w-7xl mx-auto px-4 lg:px-8 pt-5 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
   <div class="space-y-5 min-w-0">
 
-    <section class="card p-5 space-y-3">
-      <div class="flex justify-between items-center"><h2 class="font-semibold text-sm">1 · Vehicle & loan</h2><div class="flex items-center gap-2"><button class="btn !py-1" onclick="dupVehicle()">+ Copy as new</button><button id="delBtn" class="btn !py-1" onclick="delVehicle()">Delete</button></div></div>
+    <section class="card p-5 space-y-3" data-sec="s1">
+      <div class="sec-head flex justify-between items-center"><h2 class="font-semibold text-sm">1 · Vehicle & loan<span class="sec-sum" id="sum-s1"></span></h2><div class="flex items-center gap-2 sec-hide"><button class="btn !py-1" onclick="dupVehicle()">+ Copy as new</button><button id="delBtn" class="btn !py-1" onclick="delVehicle()">Delete</button></div></div>
       <div class="row"><label>Vehicle name</label><input id="name" data-k class="inp !w-48 !text-left" type="text"></div>
       <div class="row"><label>On-road price (₹)</label><input id="price" data-k class="inp" type="number" step="5000"></div>
       <div class="row"><label>Downpayment (%)</label><div class="flex items-center gap-2"><span id="downAmt" class="text-xs mu"></span><input id="down" data-k class="inp !w-20" type="number"></div></div>
@@ -102,8 +113,8 @@
       <div class="row"><div class="lbl">FD interest on downpayment (% p.a.)<span class="help"><button class="q" type="button" aria-describedby="tipFd" aria-label="What is FD interest?">?</button><span class="tip" id="tipFd" role="tooltip">The interest your downpayment would have earned in a fixed deposit. Enter 0 to ignore.</span></span></div><input id="fd" data-k class="inp !w-20" type="number" step="0.1"></div>
     </section>
 
-    <section class="card p-5 space-y-3">
-      <div class="flex justify-between items-center"><h2 class="font-semibold text-sm">2 · Earnings & fuel</h2><span class="pill">Per km</span></div>
+    <section class="card p-5 space-y-3" data-sec="s2">
+      <div class="sec-head flex justify-between items-center"><h2 class="font-semibold text-sm">2 · Earnings & fuel<span class="sec-sum" id="sum-s2"></span></h2><span class="pill sec-hide">Per km</span></div>
       <div class="row"><label>Net revenue per km (₹)</label><input id="tariff" data-k class="inp" type="number" step="0.25"></div>
       <div class="row"><label>Working days / month</label><input id="days" data-k class="inp" type="number"></div>
       <div class="row"><label>Fuel measured in</label><select id="fuelUnit" data-k class="inp !w-48"><option value="kg">CNG (kg)</option><option value="ltr">Petrol / Diesel (ltr)</option><option value="kWh">EV (kWh)</option></select></div>
@@ -113,8 +124,8 @@
       <div class="row pt-3 border-t bd"><label class="flex items-center gap-2"><input id="ovOn" data-k type="checkbox"> Use this vehicle's own daily distance</label><input id="ov" data-k class="inp !w-24" type="number" step="5"></div>
     </section>
 
-    <section class="card p-5">
-      <div class="flex flex-wrap justify-between items-center gap-2 mb-3"><h2 class="font-semibold text-sm whitespace-nowrap">3 · Running costs</h2><span class="pill">Maintenance <b id="maintKm"></b>/km · Overheads <b id="opsYr"></b>/yr</span></div>
+    <section class="card p-5" data-sec="s3">
+      <div class="sec-head flex flex-wrap justify-between items-center gap-2 mb-3"><h2 class="font-semibold text-sm whitespace-nowrap">3 · Running costs</h2><span class="pill">Maintenance <b id="maintKm"></b>/km · Overheads <b id="opsYr"></b>/yr</span></div>
       <div class="space-y-3">
         <details class="border bd rounded-xl" open>
           <summary class="flex items-center justify-between px-4 py-3 text-xs font-semibold soft rounded-xl"><span>Routine servicing</span><span class="flex items-center gap-3"><span id="svcKm" class="mu"></span><span class="chev mu">▾</span></span></summary>
@@ -134,21 +145,21 @@
       </div>
     </section>
 
-    <section class="card p-5">
-      <div class="flex justify-between items-center mb-2"><div><h2 class="font-semibold text-sm">Monthly profit vs daily km</h2><p class="text-xs mu">After EMI, overheads and lost FD interest</p></div><span class="pill">● you are here</span></div>
+    <section class="card p-5" data-sec="s4">
+      <div class="sec-head flex justify-between items-center mb-2"><div><h2 class="font-semibold text-sm">Monthly profit vs daily km<span class="sec-sum" id="sum-s4"></span></h2><p class="text-xs mu sec-hide">After EMI, overheads and lost FD interest</p></div><span class="pill sec-hide">● you are here</span></div>
       <svg id="chart" viewBox="0 0 640 240" class="w-full"></svg>
     </section>
 
-    <section class="card p-5">
-      <h2 class="font-semibold text-sm mb-1">Daily run scenarios (years 1–5)</h2>
-      <p class="text-xs mu mb-3">Your planned run and the breakeven are highlighted</p>
+    <section class="card p-5" data-sec="s5">
+      <div class="sec-head"><h2 class="font-semibold text-sm mb-1">Daily run scenarios (years 1–5)<span class="sec-sum" id="sum-s5"></span></h2>
+      <p class="text-xs mu mb-3 sec-hide">Your planned run and the breakeven are highlighted</p></div>
       <div class="overflow-x-auto"><table><thead><tr><th>Daily run</th><th>Monthly km</th><th>Revenue</th><th>All costs</th><th>Take-home / mo</th><th>Per day</th></tr></thead><tbody id="matrix"></tbody></table></div>
       <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
     </section>
 
-    <section class="card p-5">
-      <h2 class="font-semibold text-sm mb-1">6-year cash flow at your planned run</h2>
-      <p class="text-xs mu mb-3">EMI follows your loan tenure · downpayment counted at start · resale added in year 6</p>
+    <section class="card p-5" data-sec="s6">
+      <div class="sec-head"><h2 class="font-semibold text-sm mb-1">6-year cash flow at your planned run<span class="sec-sum" id="sum-s6"></span></h2>
+      <p class="text-xs mu mb-3 sec-hide">EMI follows your loan tenure · downpayment counted at start · resale added in year 6</p></div>
       <div class="overflow-x-auto"><table><thead><tr><th>Year</th><th>Km run</th><th>Revenue</th><th>Fuel</th><th>Maintenance</th><th>Overheads</th><th>EMI paid</th><th>Cash flow</th><th>Cumulative</th></tr></thead><tbody id="years"></tbody></table></div>
       <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
       <p id="yearsNote" class="text-xs mu mt-3"></p>
@@ -186,17 +197,17 @@
     <div class="row"><div><div class="h">Shared daily run</div><div class="text-xs mu mt-1">Applies to every vehicle unless it has its own distance set</div></div><b id="runLblC" class="text-lg whitespace-nowrap"></b></div>
     <input id="runC" type="range" min="50" max="300" step="5" value="150" class="mt-3">
   </section>
-  <section class="card p-5">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <div><h2 class="font-semibold text-sm">Side-by-side</h2><p id="cmpSub" class="text-xs mu mt-1"></p></div>
-      <div class="seg"><button id="perM" onclick="setPer('m')">Monthly</button><button id="perY" onclick="setPer('y')">Yearly</button></div>
+  <section class="card p-5" data-sec="c1">
+    <div class="sec-head flex flex-wrap items-center justify-between gap-3 mb-3">
+      <div><h2 class="font-semibold text-sm">Side-by-side<span class="sec-sum" id="sum-c1"></span></h2><p id="cmpSub" class="text-xs mu mt-1 sec-hide"></p></div>
+      <div class="seg sec-hide"><button id="perM" onclick="setPer('m')">Monthly</button><button id="perY" onclick="setPer('y')">Yearly</button></div>
     </div>
     <div class="overflow-x-auto"><table id="cmpTable"></table></div>
     <p id="cmpNote" class="text-[11px] mu mt-2 empty:hidden"></p>
     <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
   </section>
-  <section class="card p-5">
-    <div class="mb-2"><h2 class="font-semibold text-sm">Monthly profit vs daily km</h2><p class="text-xs mu">After EMI, overheads and lost FD interest · number in brackets = breakeven km/day</p></div>
+  <section class="card p-5" data-sec="c2">
+    <div class="sec-head mb-2"><h2 class="font-semibold text-sm">Monthly profit vs daily km<span class="sec-sum" id="sum-c2"></span></h2><p class="text-xs mu sec-hide">After EMI, overheads and lost FD interest · number in brackets = breakeven km/day</p></div>
     <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><div id="legend" class="flex flex-wrap gap-4 text-xs"></div><span class="pill">● you are here</span></div>
     <svg id="chartC" viewBox="0 0 640 240" class="w-full"></svg>
   </section>
@@ -241,13 +252,14 @@ function clean(v){
   o.fixed=(Array.isArray(v.fixed)?v.fixed:[]).slice(0,20).map(f=>({n:String((f||{}).n||'Item').slice(0,60),a:num((f||{}).a)}));
   return o;
 }
-let vehicles=clone(DEFAULTS), act=0, view='calc', G=150, per='m', st=null;
+let vehicles=clone(DEFAULTS), act=0, view='calc', G=150, per='m', secOpen={}, st=null;
 try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(st&&st.per==='y')per='y';
+if(st&&st.open&&typeof st.open==='object')secOpen=st.open;
 if(st&&Array.isArray(st.vehicles)&&st.vehicles.length){
   vehicles=fixColors(st.vehicles.slice(0,4).map(clean)); act=Math.min(Math.max(0,num(st.act)),vehicles.length-1); G=Math.min(300,Math.max(50,num(st.G,150)));
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify({vehicles,act,G,per}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({vehicles,act,G,per,open:secOpen}))}catch(e){}}
 const syncRuns=()=>['run','runM','runC'].forEach(x=>$(x).value=G);
 /* Theme: same storage key and attribute as the Web Tools hub */
 function applyTheme(mode){
@@ -365,8 +377,24 @@ function dupVehicle(){
   vehicles.push(c); act=vehicles.length-1; loadInputs(); render();
 }
 function delVehicle(){ if(vehicles.length<2||!confirm('Delete "'+vehicles[act].name+'"?'))return; vehicles.splice(act,1); act=0; loadInputs(); render(); }
+function viewSecs(){return [...document.querySelectorAll((view==='calc'?'#viewCalc':'#viewCmp')+' section[data-sec]')]}
+function setSec(sec,open){
+  sec.classList.toggle('closed',!open);
+  const b=sec.querySelector('.sec-chev'); if(b)b.setAttribute('aria-expanded',open);
+  secOpen[sec.dataset.sec]=open; syncAll();
+}
+function syncAll(){const b=$('allBtn'); if(b)b.textContent=viewSecs().some(x=>!x.classList.contains('closed'))?'Collapse all':'Expand all'}
+function toggleAll(){const close=$('allBtn').textContent==='Collapse all'; viewSecs().forEach(x=>setSec(x,!close)); save()}
+function initSections(){
+  document.querySelectorAll('section[data-sec]').forEach(sec=>{
+    const head=sec.querySelector('.sec-head'), h2=head.querySelector('h2'), b=document.createElement('button');
+    b.type='button'; b.className='sec-chev'; b.textContent='▾'; b.setAttribute('aria-label','Collapse or expand section'); h2.prepend(b);
+    head.addEventListener('click',e=>{ if(e.target.closest('button:not(.sec-chev),input,select,a,.seg'))return; setSec(sec,sec.classList.contains('closed')); save(); });
+    setSec(sec,secOpen[sec.dataset.sec]!==false);
+  });
+}
 function setView(v){
-  view=v; $('viewCalc').classList.toggle('hide',v!=='calc'); $('viewCmp').classList.toggle('hide',v!=='cmp'); $('mobBar').classList.toggle('hide',v!=='calc');
+  view=v; syncAll(); $('viewCalc').classList.toggle('hide',v!=='calc'); $('viewCmp').classList.toggle('hide',v!=='cmp'); $('mobBar').classList.toggle('hide',v!=='calc');
   $('tabCalc').classList.toggle('on',v==='calc'); $('tabCmp').classList.toggle('on',v==='cmp'); render();
 }
 
@@ -394,6 +422,12 @@ function renderView(){
     $('rEmi').textContent=inr(m.emi); $('rVar').textContent='₹'+m.varKm.toFixed(2);
     $('rPay').textContent=m.pay?'Year '+m.pay:'Not within 6 years';
     $('rTotal').textContent=sg(m.total); $('rTotal').className=cls(m.total);
+    const sm=(id,t)=>{const e=$('sum-'+id); if(e)e.textContent=t};
+    sm('s1',`${inr(p.price)} · ${p.down}% down · EMI ${inr(m.emi)}`);
+    sm('s2',`₹${(+p.tariff).toFixed(2)}/km · fuel ₹${m.fuelKm.toFixed(2)}/km · ${m.days} days/month`);
+    sm('s4',beOk?`Breakeven ${beR} km/day · you: ${m.run} km/day`:'Breakeven not reachable at this tariff');
+    sm('s5',`Planned ${m.run} km/day · take-home ${sg(m.take)}/month`);
+    sm('s6',`6-yr net ${sg(m.total)} · payback ${m.pay?'Year '+m.pay:'not within 6 years'}`);
     $('years').innerHTML=m.yrs.map(r=>`<tr${r.y===6?' class="hl"':''}><td>Year ${r.y}${r.emiM===0?' <span class="pill">No EMI</span>':''}${r.y===6?' <span class="pill">+ resale</span>':''}</td><td>${Math.round(r.yKm).toLocaleString('en-IN')} km</td><td>${inr(r.rev)}</td><td>${inr(r.fuel)}</td><td>${inr(r.mnt)}</td><td>${inr(m.opsYr)}</td><td>${inr(r.emiY)}</td><td class="${cls(r.cf)}">${sg(r.cf)}</td><td class="${cls(r.cum)}">${sg(r.cum)}</td></tr>`).join('');
     const T=m.yrs.reduce((a,r)=>({yKm:a.yKm+r.yKm,rev:a.rev+r.rev,fuel:a.fuel+r.fuel,mnt:a.mnt+r.mnt,emiY:a.emiY+r.emiY,cf:a.cf+r.cf}),{yKm:0,rev:0,fuel:0,mnt:0,emiY:0,cf:0});
     $('years').insertAdjacentHTML('beforeend',`<tr class="hl tot"><td>Total · 6 years</td><td>${Math.round(T.yKm).toLocaleString('en-IN')} km</td><td>${inr(T.rev)}</td><td>${inr(T.fuel)}</td><td>${inr(T.mnt)}</td><td>${inr(m.opsYr*6)}</td><td>${inr(T.emiY)}</td><td class="${cls(T.cf)}">${sg(T.cf)}</td><td>—</td></tr>`);
@@ -452,6 +486,8 @@ function renderView(){
       });
     });
     $('cmpTable').innerHTML=h+'</tbody>';
+    $('sum-c1').textContent=`${ms.length} vehicles · ${P?'yearly':'monthly'}`;
+    $('sum-c2').textContent=`Breakeven: `+ms.map(m=>(isFinite(m.be)?Math.ceil(m.be):'—')).join(' · ')+' km/day';
     $('legend').innerHTML=ms.map(m=>`<span class="flex items-center gap-1.5"><span class="dot" style="background:${COLORS[m.p.c]}"></span>${esc(m.p.name)}</span>`).join('');
     drawChart('chartC',ms,false);
   }
@@ -469,7 +505,7 @@ document.querySelectorAll('.help').forEach(el=>{
   const place=()=>el.classList.toggle('flip',el.getBoundingClientRect().left+el.querySelector('.tip').offsetWidth>innerWidth-8);
   ['mouseenter','focusin'].forEach(ev=>el.addEventListener(ev,place)); addEventListener('resize',place); place();
 });
-syncRuns(); loadInputs(); render();
+initSections(); syncRuns(); loadInputs(); render();
 </script>
 </body>
 </html>
