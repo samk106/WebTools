@@ -21,7 +21,7 @@
   .inp:focus{border-color:var(--fg)}
   .h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
   .btn{font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);cursor:pointer}
-  .btn:hover{background:var(--soft)}
+  .btn:hover{background:var(--soft)} .btn{white-space:nowrap}
   .btn.icon{width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
   .chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--card);cursor:pointer;white-space:nowrap}
   .chip.on{background:var(--inv);color:var(--invfg);border-color:var(--inv)}
@@ -35,13 +35,22 @@
   td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap} th:first-child,td:first-child{text-align:left}
   tr.hl td{background:var(--soft);font-weight:700}
   tr.tot td{border-top:2px solid var(--fg);font-weight:800}
+  td:first-child,th:first-child{position:sticky;left:0;z-index:1;background:var(--card)}
+  tr.hl td:first-child{background:var(--soft)}
+  tr.grp td:first-child{position:static}
+  .gt{position:sticky;left:12px}
+  @media(max-width:640px){
+    td,th{padding:8px 8px;font-size:11.5px}
+    td:first-child,th:first-child{white-space:normal;min-width:84px;max-width:118px}
+    tr.grp td{padding:8px 12px}
+  }
   tr.grp td{background:var(--soft);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);padding:8px 12px;text-align:left}
   td.best{background:color-mix(in srgb,var(--pos) 14%,transparent);font-weight:700}
   input[type=range]{width:100%;accent-color:var(--fg)}
   input[type=checkbox]{accent-color:var(--fg)}
   .hide{display:none!important}
-  .lbl{display:flex;align-items:center;gap:6px;color:var(--mu)}
-  .help{position:relative;display:inline-flex}
+  .lbl{display:block;color:var(--mu)}
+  .help{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
   .q{width:18px;height:18px;border-radius:50%;border:1px solid var(--bd);background:var(--soft);color:var(--mu);font:inherit;font-size:11px;font-weight:700;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
   .q:hover,.q:focus-visible{background:var(--inv);color:var(--invfg);border-color:var(--inv);outline:none}
   .tip{position:absolute;left:-6px;top:calc(100% + 8px);z-index:30;width:270px;max-width:70vw;padding:10px 12px;border-radius:12px;background:var(--inv);color:var(--invfg);font-size:12px;line-height:1.45;font-weight:500;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(-3px);transition:opacity .15s,transform .15s,visibility .15s;pointer-events:none}
@@ -79,8 +88,8 @@
 </div>
 
 <!-- CALCULATOR VIEW -->
-<main id="viewCalc" class="max-w-7xl mx-auto px-4 lg:px-8 pt-5 grid lg:grid-cols-[1fr_360px] gap-6 items-start">
-  <div class="space-y-5">
+<main id="viewCalc" class="max-w-7xl mx-auto px-4 lg:px-8 pt-5 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+  <div class="space-y-5 min-w-0">
 
     <section class="card p-5 space-y-3">
       <div class="flex justify-between items-center"><h2 class="font-semibold text-sm">1 · Vehicle & loan</h2><div class="flex items-center gap-2"><button class="btn !py-1" onclick="dupVehicle()">+ Copy as new</button><button id="delBtn" class="btn !py-1" onclick="delVehicle()">Delete</button></div></div>
@@ -105,7 +114,7 @@
     </section>
 
     <section class="card p-5">
-      <div class="flex justify-between items-center mb-3"><h2 class="font-semibold text-sm">3 · Running costs</h2><span class="pill">Maintenance <b id="maintKm"></b>/km · Overheads <b id="opsYr"></b>/yr</span></div>
+      <div class="flex flex-wrap justify-between items-center gap-2 mb-3"><h2 class="font-semibold text-sm whitespace-nowrap">3 · Running costs</h2><span class="pill">Maintenance <b id="maintKm"></b>/km · Overheads <b id="opsYr"></b>/yr</span></div>
       <div class="space-y-3">
         <details class="border bd rounded-xl" open>
           <summary class="flex items-center justify-between px-4 py-3 text-xs font-semibold soft rounded-xl"><span>Routine servicing</span><span class="flex items-center gap-3"><span id="svcKm" class="mu"></span><span class="chev mu">▾</span></span></summary>
@@ -134,12 +143,14 @@
       <h2 class="font-semibold text-sm mb-1">Daily run scenarios (years 1–5)</h2>
       <p class="text-xs mu mb-3">Your planned run and the breakeven are highlighted</p>
       <div class="overflow-x-auto"><table><thead><tr><th>Daily run</th><th>Monthly km</th><th>Revenue</th><th>All costs</th><th>Take-home / mo</th><th>Per day</th></tr></thead><tbody id="matrix"></tbody></table></div>
+      <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
     </section>
 
     <section class="card p-5">
       <h2 class="font-semibold text-sm mb-1">6-year cash flow at your planned run</h2>
       <p class="text-xs mu mb-3">EMI follows your loan tenure · downpayment counted at start · resale added in year 6</p>
       <div class="overflow-x-auto"><table><thead><tr><th>Year</th><th>Km run</th><th>Revenue</th><th>Fuel</th><th>Maintenance</th><th>Overheads</th><th>EMI paid</th><th>Cash flow</th><th>Cumulative</th></tr></thead><tbody id="years"></tbody></table></div>
+      <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
       <p id="yearsNote" class="text-xs mu mt-3"></p>
     </section>
   </div>
@@ -172,7 +183,7 @@
 <!-- COMPARE VIEW -->
 <main id="viewCmp" class="hide max-w-7xl mx-auto px-4 lg:px-8 pt-5 space-y-5">
   <section class="card p-5">
-    <div class="row"><div><div class="h">Shared daily run</div><div class="text-xs mu mt-1">Applies to every vehicle unless it has its own distance set</div></div><b id="runLblC" class="text-lg"></b></div>
+    <div class="row"><div><div class="h">Shared daily run</div><div class="text-xs mu mt-1">Applies to every vehicle unless it has its own distance set</div></div><b id="runLblC" class="text-lg whitespace-nowrap"></b></div>
     <input id="runC" type="range" min="50" max="300" step="5" value="150" class="mt-3">
   </section>
   <section class="card p-5">
@@ -181,6 +192,8 @@
       <div class="seg"><button id="perM" onclick="setPer('m')">Monthly</button><button id="perY" onclick="setPer('y')">Yearly</button></div>
     </div>
     <div class="overflow-x-auto"><table id="cmpTable"></table></div>
+    <p id="cmpNote" class="text-[11px] mu mt-2 empty:hidden"></p>
+    <p class="sm:hidden text-[11px] mu mt-2">Swipe the table sideways to see all columns →</p>
   </section>
   <section class="card p-5">
     <div class="mb-2"><h2 class="font-semibold text-sm">Monthly profit vs daily km</h2><p class="text-xs mu">After EMI, overheads and lost FD interest · number in brackets = breakeven km/day</p></div>
@@ -265,8 +278,9 @@ function resetAll(){ if(!confirm('Reset to the sample vehicles? Your changes wil
 
 function buildLists(){
   const p=vehicles[act];
-  $('wearList').innerHTML=p.wear.length?p.wear.map((w,i)=>`<div class="flex flex-wrap items-center gap-2 text-xs soft rounded-xl p-2.5"><input class="inp !text-left flex-1 min-w-[140px]" type="text" value="${esc(w.n)}" oninput="editWear(${i},'n',this.value)"><span class="mu">₹</span><input class="inp !w-24" type="number" value="${w.c}" oninput="editWear(${i},'c',this.value)"><span class="mu">every</span><input class="inp !w-24" type="number" value="${w.km}" oninput="editWear(${i},'km',this.value)"><span class="mu">km</span><span id="ws${i}" class="mu w-16 text-right"></span><button class="mu px-1 ${i===0?'opacity-30 pointer-events-none':''}" onclick="moveWear(${i},-1)" title="Move up">▲</button><button class="mu px-1 ${i===p.wear.length-1?'opacity-30 pointer-events-none':''}" onclick="moveWear(${i},1)" title="Move down">▼</button><button class="mu px-1" onclick="delWear(${i})" title="Remove">✕</button></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
-  $('fixedList').innerHTML=p.fixed.length?p.fixed.map((f,i)=>`<div class="flex flex-wrap items-center gap-2 text-xs soft rounded-xl p-2.5"><input class="inp !text-left flex-1 min-w-[140px]" type="text" value="${esc(f.n)}" oninput="editFixed(${i},'n',this.value)"><span class="mu">₹</span><input class="inp !w-24" type="number" value="${f.a}" oninput="editFixed(${i},'a',this.value)"><span class="mu">per year</span><span id="fs${i}" class="mu w-16 text-right"></span><button class="mu px-1 ${i===0?'opacity-30 pointer-events-none':''}" onclick="moveFixed(${i},-1)" title="Move up">▲</button><button class="mu px-1 ${i===p.fixed.length-1?'opacity-30 pointer-events-none':''}" onclick="moveFixed(${i},1)" title="Move down">▼</button><button class="mu px-1" onclick="delFixed(${i})" title="Remove">✕</button></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
+  const arrows=(i,n,mv,del)=>`<button class="mu px-2 py-1 text-sm ${i===0?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},-1)" title="Move up">▲</button><button class="mu px-2 py-1 text-sm ${i===n-1?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},1)" title="Move down">▼</button><button class="mu px-2 py-1 text-sm" onclick="${del}(${i})" title="Remove">✕</button>`;
+  $('wearList').innerHTML=p.wear.length?p.wear.map((w,i)=>`<div class="soft rounded-xl p-2.5 space-y-2 text-xs"><div class="flex items-center gap-1"><input class="inp !text-left flex-1 min-w-0" type="text" value="${esc(w.n)}" oninput="editWear(${i},'n',this.value)">${arrows(i,p.wear.length,'moveWear','delWear')}</div><div class="flex flex-wrap items-center gap-2"><span class="mu">₹</span><input class="inp !w-[4.5rem]" type="number" value="${w.c}" oninput="editWear(${i},'c',this.value)"><span class="mu">every</span><input class="inp !w-[4.5rem]" type="number" value="${w.km}" oninput="editWear(${i},'km',this.value)"><span class="mu">km</span><span id="ws${i}" class="mu ml-auto"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
+  $('fixedList').innerHTML=p.fixed.length?p.fixed.map((f,i)=>`<div class="soft rounded-xl p-2.5 space-y-2 text-xs"><div class="flex items-center gap-1"><input class="inp !text-left flex-1 min-w-0" type="text" value="${esc(f.n)}" oninput="editFixed(${i},'n',this.value)">${arrows(i,p.fixed.length,'moveFixed','delFixed')}</div><div class="flex flex-wrap items-center gap-2"><span class="mu">₹</span><input class="inp !w-24" type="number" value="${f.a}" oninput="editFixed(${i},'a',this.value)"><span class="mu">per year</span><span id="fs${i}" class="mu ml-auto"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
 }
 function editWear(i,k,v){vehicles[act].wear[i][k]=k==='n'?v:(parseFloat(v)||0);render()}
 function editFixed(i,k,v){vehicles[act].fixed[i][k]=k==='n'?v:(parseFloat(v)||0);render()}
@@ -396,7 +410,7 @@ function renderView(){
     $('runLblC').textContent=G+' km/day';
     const P=per==='y', pl=P?'year':'month', Y=m=>m.yrs[0];
     $('perM').classList.toggle('on',!P); $('perY').classList.toggle('on',P);
-    $('cmpSub').textContent='Best value in each row is highlighted'+(P?' · yearly figures are Year 1 of the 6-year outlook':'');
+    $('cmpSub').textContent='Best value in each row is highlighted'; $('cmpNote').textContent=P?'Yearly figures are Year 1 of the 6-year outlook.':'';
     const rev=m=>P?Y(m).rev:m.run*m.days*m.p.tariff, emi=m=>P?Y(m).emiY:m.emi,
       fuel=m=>P?Y(m).fuel:m.run*m.days*m.fuelKm, mnt=m=>P?Y(m).mnt:m.run*m.days*m.maintKm,
       ovh=m=>P?m.opsYr:m.ops, take=m=>P?Y(m).cf:m.take, lost=m=>P?m.opp*12:m.opp, net=m=>take(m)-lost(m);
@@ -430,7 +444,7 @@ function renderView(){
     ];
     let h='<thead><tr><th></th>'+ms.map(m=>`<th><span class="dot" style="background:${COLORS[m.p.c]}"></span> ${esc(m.p.name)}</th>`).join('')+'</tr></thead><tbody>';
     GROUPS.forEach(([title,rows])=>{
-      h+=`<tr class="grp"><td colspan="${ms.length+1}">${title}</td></tr>`;
+      h+=`<tr class="grp"><td colspan="${ms.length+1}"><span class="gt">${title}</span></td></tr>`;
       rows.forEach(([lbl,f,val,dir])=>{
         let best=null;
         if(val&&dir){const vs=ms.map(val).filter(x=>isFinite(x)); if(vs.length>1&&new Set(vs).size>1)best=dir==='hi'?Math.max(...vs):Math.min(...vs)}
@@ -453,7 +467,7 @@ let savedTheme='light'; try{savedTheme=localStorage.getItem('hub-theme')||'light
 applyTheme(savedTheme);
 document.querySelectorAll('.help').forEach(el=>{
   const place=()=>el.classList.toggle('flip',el.getBoundingClientRect().left+el.querySelector('.tip').offsetWidth>innerWidth-8);
-  ['mouseenter','focusin'].forEach(ev=>el.addEventListener(ev,place)); addEventListener('resize',place);
+  ['mouseenter','focusin'].forEach(ev=>el.addEventListener(ev,place)); addEventListener('resize',place); place();
 });
 syncRuns(); loadInputs(); render();
 </script>
