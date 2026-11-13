@@ -86,6 +86,47 @@
       ]
     },
     {
+      "name": "Splendor bike",
+      "price": 100000,
+      "down": 15,
+      "rate": 12,
+      "ten": 60,
+      "resale": 25000,
+      "fd": 7,
+      "tariff": 7,
+      "days": 25,
+      "cng": 105,
+      "mil": 50,
+      "intv": 3000,
+      "svc": 1500,
+      "ov": 120,
+      "c": 2,
+      "ovOn": false,
+      "fuelUnit": "ltr",
+      "wear": [
+        {
+          "n": "Tyres & chain set",
+          "c": 4000,
+          "km": 20000
+        },
+        {
+          "n": "Battery & clutch plates",
+          "c": 2500,
+          "km": 30000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Insurance",
+          "a": 2000
+        },
+        {
+          "n": "Registration & PUC",
+          "a": 1000
+        }
+      ]
+    },
+    {
       "name": "S-Presso - NO LOAN",
       "price": 600000,
       "down": 100,
@@ -168,21 +209,21 @@
       ]
     },
     {
-      "name": "Splendor bike",
+      "name": "Splendor - NO EMI",
       "price": 100000,
-      "down": 15,
+      "down": 100,
       "rate": 12,
-      "ten": 36,
+      "ten": 60,
       "resale": 25000,
       "fd": 7,
       "tariff": 7,
-      "days": 26,
+      "days": 25,
       "cng": 105,
       "mil": 50,
       "intv": 3000,
       "svc": 1500,
       "ov": 120,
-      "c": 2,
+      "c": 5,
       "ovOn": false,
       "fuelUnit": "ltr",
       "wear": [
@@ -200,7 +241,7 @@
       "fixed": [
         {
           "n": "Insurance",
-          "a": 3000
+          "a": 2000
         },
         {
           "n": "Registration & PUC",
