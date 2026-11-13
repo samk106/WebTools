@@ -56,6 +56,21 @@
   .vsel .sw[aria-expanded="true"]{border-color:var(--bd)}
   .va{flex:none;width:40px;border:0;background:none;color:var(--fg);font:inherit;font-size:20px;line-height:1;cursor:pointer}
   .va:hover:not(:disabled){background:var(--soft)} .va:disabled{opacity:.3;cursor:default}
+  .wr{background:var(--soft);border-radius:12px;padding:10px;font-size:12px}
+  .wr1{display:flex;align-items:center;gap:4px}
+  .wr2{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+  .wnm{flex:1;min-width:0;text-align:left!important}
+  .inp.wn{width:5.5rem;padding-left:8px;padding-right:8px}
+  .wbt{display:flex;align-items:center;flex:none}
+  .wsub{margin-left:auto;color:var(--mu)}
+  @media(min-width:640px){
+    .wr{display:flex;align-items:center;gap:12px;padding:12px 14px}
+    .wr1,.wr2{display:contents}
+    .wnm{min-width:170px}
+    .inp.wn{width:7rem}
+    .wsub{margin-left:0;min-width:5rem;text-align:right}
+    .wbt{order:10;margin-left:6px}
+  }
   .menu.setmenu{left:auto;right:0;width:250px;max-width:calc(100vw - 24px);top:calc(100% + 8px)}
   .tipb[aria-expanded="true"]::after{opacity:0!important}
   .mi svg{flex:none;color:var(--mu)}
@@ -212,7 +227,7 @@
     <div class="card p-5 space-y-4">
       <div>
         <div class="row"><span class="h">Planned daily run</span><b id="runLbl" class="text-sm"></b></div>
-        <input id="run" type="range" min="50" max="300" step="5" value="150" class="mt-2">
+        <input id="run" type="range" min="50" max="500" step="5" value="150" class="mt-2">
         <div id="runNote" class="text-[11px] mu mt-1"></div>
       </div>
       <div class="rounded-xl p-4" style="background:var(--inv);color:var(--invfg)">
@@ -237,7 +252,7 @@
 <main id="viewCmp" class="hide max-w-7xl mx-auto px-4 lg:px-8 pt-5 space-y-5">
   <section class="card p-5">
     <div class="row"><div><div class="h">Shared daily run</div><div class="text-xs mu mt-1">Applies to every vehicle unless it has its own distance set</div></div><b id="runLblC" class="text-lg whitespace-nowrap"></b></div>
-    <input id="runC" type="range" min="50" max="300" step="5" value="150" class="mt-3">
+    <input id="runC" type="range" min="50" max="500" step="5" value="150" class="mt-3">
   </section>
   <section class="card p-5" data-sec="c1">
     <div class="sec-head flex items-center justify-between gap-3 mb-1">
@@ -259,7 +274,7 @@
 <div id="mobBar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t bd p-3" style="background:var(--card)">
   <div class="flex items-center justify-between gap-4">
     <div><div class="h">Breakeven</div><div id="mBe" class="font-extrabold text-lg"></div></div>
-    <div class="flex-1"><input id="runM" type="range" min="50" max="300" step="5" value="150"><div id="runLblM" class="text-[11px] mu text-center"></div></div>
+    <div class="flex-1"><input id="runM" type="range" min="50" max="500" step="5" value="150"><div id="runLblM" class="text-[11px] mu text-center"></div></div>
     <div class="text-right"><div class="h">Take-home/mo</div><div id="mTake" class="font-extrabold text-lg"></div></div>
   </div>
 </div>
@@ -300,7 +315,7 @@ try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(st&&st.per==='y')per='y';
 if(st&&st.open&&typeof st.open==='object')secOpen=st.open;
 if(st&&Array.isArray(st.vehicles)&&st.vehicles.length){
-  vehicles=fixColors(st.vehicles.slice(0,MAXV).map(clean)); act=Math.min(Math.max(0,num(st.act)),vehicles.length-1); G=Math.min(300,Math.max(50,num(st.G,150)));
+  vehicles=fixColors(st.vehicles.slice(0,MAXV).map(clean)); act=Math.min(Math.max(0,num(st.act)),vehicles.length-1); G=Math.min(500,Math.max(50,num(st.G,150)));
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify({vehicles,act,G,per,open:secOpen}))}catch(e){}}
 const syncRuns=()=>['run','runM','runC'].forEach(x=>$(x).value=G);
@@ -324,7 +339,7 @@ function importData(inp){
   r.onload=()=>{
     let d; try{d=JSON.parse(r.result); if(!d||!Array.isArray(d.vehicles)||!d.vehicles.length)throw 0}catch(e){alert('Could not import: this is not a valid Cab Economics backup file.');return}
     if(!confirm('Replace your current vehicles with the imported file?'))return;
-    vehicles=fixColors(d.vehicles.slice(0,MAXV).map(clean)); act=0; G=Math.min(300,Math.max(50,num(d.G,150))); syncRuns(); loadInputs(); render();
+    vehicles=fixColors(d.vehicles.slice(0,MAXV).map(clean)); act=0; G=Math.min(500,Math.max(50,num(d.G,150))); syncRuns(); loadInputs(); render();
   };
   r.readAsText(f);
 }
@@ -332,9 +347,9 @@ function resetAll(){ if(!confirm('Reset to the sample vehicles? Your changes wil
 
 function buildLists(){
   const p=vehicles[act];
-  const arrows=(i,n,mv,del)=>`<button class="mu px-2 py-1 text-sm ${i===0?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},-1)" title="Move up">▲</button><button class="mu px-2 py-1 text-sm ${i===n-1?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},1)" title="Move down">▼</button><button class="mu px-2 py-1 text-sm" onclick="${del}(${i})" title="Remove">✕</button>`;
-  $('wearList').innerHTML=p.wear.length?p.wear.map((w,i)=>`<div class="soft rounded-xl p-2.5 space-y-2 text-xs"><div class="flex items-center gap-1"><input class="inp !text-left flex-1 min-w-0" type="text" value="${esc(w.n)}" oninput="editWear(${i},'n',this.value)">${arrows(i,p.wear.length,'moveWear','delWear')}</div><div class="flex flex-wrap items-center gap-2"><span class="mu">₹</span><input class="inp !w-[4.5rem]" type="number" value="${w.c}" oninput="editWear(${i},'c',this.value)"><span class="mu">every</span><input class="inp !w-[4.5rem]" type="number" value="${w.km}" oninput="editWear(${i},'km',this.value)"><span class="mu">km</span><span id="ws${i}" class="mu ml-auto"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
-  $('fixedList').innerHTML=p.fixed.length?p.fixed.map((f,i)=>`<div class="soft rounded-xl p-2.5 space-y-2 text-xs"><div class="flex items-center gap-1"><input class="inp !text-left flex-1 min-w-0" type="text" value="${esc(f.n)}" oninput="editFixed(${i},'n',this.value)">${arrows(i,p.fixed.length,'moveFixed','delFixed')}</div><div class="flex flex-wrap items-center gap-2"><span class="mu">₹</span><input class="inp !w-24" type="number" value="${f.a}" oninput="editFixed(${i},'a',this.value)"><span class="mu">per year</span><span id="fs${i}" class="mu ml-auto"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
+  const arrows=(i,n,mv,del)=>`<span class="wbt"><button class="mu px-2 py-1 text-sm ${i===0?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},-1)" title="Move up">▲</button><button class="mu px-2 py-1 text-sm ${i===n-1?'opacity-30 pointer-events-none':''}" onclick="${mv}(${i},1)" title="Move down">▼</button><button class="mu px-2 py-1 text-sm" onclick="${del}(${i})" title="Remove">✕</button></span>`;
+  $('wearList').innerHTML=p.wear.length?p.wear.map((w,i)=>`<div class="wr"><div class="wr1"><input class="inp wnm" type="text" value="${esc(w.n)}" oninput="editWear(${i},'n',this.value)" aria-label="Item name">${arrows(i,p.wear.length,'moveWear','delWear')}</div><div class="wr2"><span class="mu">₹</span><input class="inp wn" type="number" value="${w.c}" oninput="editWear(${i},'c',this.value)" aria-label="Cost"><span class="mu">every</span><input class="inp wn" type="number" value="${w.km}" oninput="editWear(${i},'km',this.value)" aria-label="Interval in km"><span class="mu">km</span><span id="ws${i}" class="wsub"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
+  $('fixedList').innerHTML=p.fixed.length?p.fixed.map((f,i)=>`<div class="wr"><div class="wr1"><input class="inp wnm" type="text" value="${esc(f.n)}" oninput="editFixed(${i},'n',this.value)" aria-label="Item name">${arrows(i,p.fixed.length,'moveFixed','delFixed')}</div><div class="wr2"><span class="mu">₹</span><input class="inp wn" type="number" value="${f.a}" oninput="editFixed(${i},'a',this.value)" aria-label="Cost per year"><span class="mu">per year</span><span id="fs${i}" class="wsub"></span></div></div>`).join(''):'<div class="text-xs mu p-2">No items yet — use + Add</div>';
 }
 function editWear(i,k,v){vehicles[act].wear[i][k]=k==='n'?v:(parseFloat(v)||0);render()}
 function editFixed(i,k,v){vehicles[act].fixed[i][k]=k==='n'?v:(parseFloat(v)||0);render()}
@@ -371,24 +386,26 @@ function calc(p){
 
 function chartSVG(list,W,H,single){
   const L=56,R=16,T=14,B=30,xs=[];
-  for(let k=50;k<=300;k+=10)xs.push(k);
+  const need=Math.max(...list.map(m=>Math.max(m.run,isFinite(m.be)?Math.ceil(m.be):0)));
+  const xmax=Math.min(500,Math.max(300,Math.ceil(need/50)*50)), ticks=[]; for(let k=50;k<=xmax;k+=50)ticks.push(k);
+  for(let k=50;k<=xmax;k+=10)xs.push(k);
   const all=list.flatMap(m=>xs.map(k=>m.cash(k)-m.opp));
   const lo=Math.min(0,...all),hi=Math.max(0,...all),pad=(hi-lo)*.1||1;
-  const X=k=>L+(k-50)/250*(W-L-R), Y=y=>T+(1-(y-(lo-pad))/((hi+pad)-(lo-pad)))*(H-T-B);
+  const X=k=>L+(k-50)/(xmax-50)*(W-L-R), Y=y=>T+(1-(y-(lo-pad))/((hi+pad)-(lo-pad)))*(H-T-B);
   let s='<g stroke="var(--bd)">';
-  [50,100,150,200,250,300].forEach(k=>s+=`<line x1="${X(k)}" x2="${X(k)}" y1="${T}" y2="${H-B}"/>`);
+  ticks.forEach(k=>s+=`<line x1="${X(k)}" x2="${X(k)}" y1="${T}" y2="${H-B}"/>`);
   s+='</g><g fill="var(--mu)" font-size="11" text-anchor="middle">';
-  [50,100,150,200,250,300].forEach(k=>s+=`<text x="${X(k)}" y="${H-10}">${k}</text>`);
+  ticks.forEach(k=>s+=`<text x="${X(k)}" y="${H-10}">${k}</text>`);
   s+=`</g><g fill="var(--mu)" font-size="11" text-anchor="end"><text x="${L-6}" y="${Y(hi)+3}">${inr(hi)}</text><text x="${L-6}" y="${Y(lo)+3}">${inr(lo)}</text></g>`;
   s+=`<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--fg)" stroke-dasharray="4 4" opacity=".5"/>`;
   list.forEach((m,i)=>{
     const c=single?'var(--fg)':COLORS[m.p.c];
     s+=`<polyline fill="none" stroke="${c}" stroke-width="2.5" points="${xs.map(k=>X(k)+','+Y(m.cash(k)-m.opp)).join(' ')}"/>`;
-    if(isFinite(m.be)&&m.be>=50&&m.be<=300&&(single||list.length<=6)){
+    if(isFinite(m.be)&&m.be>=50&&m.be<=xmax&&(single||list.length<=6)){
       const b=Math.ceil(m.be), bc=single?'var(--pos)':c, ty=T+11+(single?0:i*14), flip=X(b)>W-120;
       const mx=W<500?9:16, nm=m.p.name.length>mx?m.p.name.slice(0,mx-1)+'…':m.p.name, lbl=single?`breakeven ${b}`:`${esc(nm)} (${b})`;
       s+=`<line x1="${X(b)}" x2="${X(b)}" y1="${T}" y2="${H-B}" stroke="${bc}" stroke-dasharray="3 3"/><text x="${flip?X(b)-4:X(b)+4}" y="${ty}" text-anchor="${flip?'end':'start'}" font-size="11" fill="${bc}" font-weight="600" stroke="var(--card)" stroke-width="3" paint-order="stroke">${lbl}</text>`}
-    const rx=Math.max(50,Math.min(300,m.run));
+    const rx=Math.max(50,Math.min(xmax,m.run));
     s+=`<circle cx="${X(rx)}" cy="${Y(m.econ)}" r="6" fill="${c}" stroke="var(--card)" stroke-width="2"/>`;
   });
   return s;
