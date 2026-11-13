@@ -63,7 +63,8 @@
   .inp.wn{width:5.5rem;padding-left:8px;padding-right:8px}
   .wbt{display:flex;align-items:center;flex:none}
   .wsub{margin-left:auto;color:var(--mu)}
-  @media(min-width:640px){
+  #wearList,#fixedList{container-type:inline-size}
+  @container (min-width:760px){
     .wr{display:flex;align-items:center;gap:12px;padding:12px 14px}
     .wr1,.wr2{display:contents}
     .wnm{min-width:170px}
@@ -119,6 +120,15 @@
   .help:hover .tip,.help:focus-within .tip{opacity:1;visibility:visible;transform:none}
   .help.flip .tip{left:auto;right:-6px} .help.flip .tip::before{left:auto;right:10px}
   @media(max-width:480px){.tip{width:225px}}
+
+  /* Desktop table fit: wider page on big screens, compact cells + slimmer panel on laptops */
+  @media(min-width:1420px){ .max-w-7xl{max-width:1480px!important} }
+  @media(min-width:1024px) and (max-width:1419px){
+    #viewCalc{grid-template-columns:minmax(0,1fr) 320px}
+    #viewCalc table th,#viewCalc table td{padding-left:7px;padding-right:7px}
+    #viewCalc table{font-size:11.5px}
+  }
+  #rTake,#rEcon,#rEmi,#rVar,#rPay,#rTotal{white-space:nowrap}
 </style>
 </head>
 <body class="pb-24 lg:pb-10">
