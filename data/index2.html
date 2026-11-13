@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Directory Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fafafa; --surface:#fff; --text:#0a0a0a; --muted:#6b6b6b; --border:#e6e6e6; --tile:#f2f2f2; --pill-bg:#f2f2f2; --hover-border:#0a0a0a; --shadow:0 1px 2px rgba(0,0,0,.04); }
+  :root[data-theme="dark"] { --bg:#0a0a0a; --surface:#141414; --text:#f5f5f5; --muted:#9a9a9a; --border:#2a2a2a; --tile:#1f1f1f; --pill-bg:#1f1f1f; --hover-border:#f5f5f5; --shadow:none; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; display:flex; flex-direction:column; }
+  button { font:inherit; color:inherit; }
+  
+  .bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:32px; height:32px; border-radius:8px; background:var(--text); color:var(--bg); display:grid; place-items:center; font-size:15px; }
+  h1 { margin:0; font-size:1.1rem; font-weight:700; }
+  .pill { display:inline-block; font-size:.72rem; font-weight:600; padding:3px 10px; border-radius:999px; background:var(--pill-bg); color:var(--muted); }
+  
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; font-size:.85rem; font-weight:500; background:var(--surface); border:1px solid var(--border); border-radius:999px; cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s; }
+  .btn:hover { border-color:var(--hover-border); }
+  .btn.icon { width:40px; height:40px; padding:0; justify-content:center; }
+
+  input[type=search] { width:100%; padding:9px 14px; font:inherit; font-size:.88rem; color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:999px; }
+  input[type=search]:focus { outline:none; border-color:var(--hover-border); }
+  
+  .msg { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; gap:12px; text-decoration:none; color:inherit; transition:border-color .15s; }
+  .msg:hover { border-color:var(--hover-border); }
+  .msg-info { display:flex; align-items:center; gap:12px; min-width:0; }
+  .ct { margin:0; font-size:1rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sub { font-size:.78rem; color:var(--muted); margin-top:2px; }
+
+  #app { flex:1; min-height:0; display:flex; flex-direction:column; }
+  .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .toolbar h2 { margin:0; font-size:1.05rem; font-weight:700; flex:1; min-width:140px; }
+  .toolbar input[type=search] { width:220px; }
+  #back-list { display:none; }
+  
+  .content { flex:1; min-height:0; display:grid; grid-template-columns:320px 1fr; }
+  aside { display:flex; flex-direction:column; background:var(--surface); border-right:1px solid var(--border); }
+  .side-head { padding:16px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+  #list { overflow-y:auto; padding:8px; flex:1; }
+  
+  .conv { display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:4px; background:none; border:1px solid transparent; border-radius:12px; cursor:pointer; }
+  .conv:hover, .conv.active { background:var(--tile); }
+  .conv.active { border-color:var(--hover-border); }
+  .conv .t { font-size:.9rem; font-weight:600; }
+  .conv .m { margin-top:2px; font-size:.78rem; color:var(--muted); }
+
+  #chat { overflow-y:auto; padding:24px; }
+  .thread { max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+  .none, .placeholder { padding:16px; color:var(--muted); font-size:.88rem; text-align:center; }
+
+  @media (max-width:760px) {
+    .toolbar input[type=search] { width:100%; order:5; }
+    .content { grid-template-columns:1fr; }
+    #app.list.reading aside { display:none; }
+    #app.list:not(.reading) #chat { display:none; }
+    #app.list #back-list { display:inline-flex; }
+    #app.list:not(.reading) #back-list, #app.list:not(.reading) #cardSearch { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">  
+  <div class="brand">    
+    <div class="logo">📁</div>    
+    <h1>Directory Index</h1>    
+    <span class="pill">Static Site</span>  
+  </div>  
+  <button class="btn icon" id="themeBtn" type="button" aria-label="Toggle theme">🌓</button>
+</header>
+
+<div id="app" class="list">  
+  <div class="toolbar">    
+    <button class="btn" id="back-list" type="button">← Folders</button>    
+    <h2 id="convTitle">Root Directory</h2>    
+    <span class="pill" id="msgCount">0 items</span>    
+    <input type="search" id="cardSearch" placeholder="Search files...">
+  </div>  
+  <div class="content">    
+    <aside>      
+      <div class="side-head">        
+        <strong>Folders</strong>        
+        <input type="search" id="listSearch" placeholder="Filter folders...">      
+      </div>      
+      <div id="list"></div>    
+    </aside>    
+    <div id="chat">
+      <div class="thread" id="thread"></div>
+    </div>  
+  </div>
+</div>
+
+<script>
+const directoryData = {
+  name: "My Website Directory",
+  folders: [
+    {
+      id: "docs",
+      name: "Documentation",
+      items: [
+        { name: "Getting Started", ext: ".html", url: "./docs/getting-started.html", size: "14 KB" },
+        { name: "API Reference", ext: ".md", url: "./docs/api.md", size: "32 KB" }
+      ]
+    },
+    {
+      id: "assets",
+      name: "Assets",
+      items: [
+        { name: "Stylesheet", ext: ".css", url: "./assets/styles.css", size: "18 KB" },
+        { name: "Logo Graphic", ext: ".svg", url: "./assets/logo.svg", size: "8 KB" }
+      ]
+    }
+  ]
+};
+
+let active = 'all';
+const $ = id => document.getElementById(id);
+
+function renderList() {
+  const q = $('listSearch').value.toLowerCase();
+  const listContainer = $('list');
+  let totalFiles = 0;
+  
+  directoryData.folders.forEach(f => totalFiles += f.items.length);
+  listContainer.innerHTML = '';
+
+  const addNavItem = (id, title, count) => {
+    const b = document.createElement('button');
+    b.className = `conv ${id === active ? 'active' : ''}`;
+    b.innerHTML = `<div class="t">${title}</div><div class="m">${count} items</div>`;
+    b.onclick = () => { active = id; $('cardSearch').value = ''; $('app').classList.add('reading'); render(); };
+    listContainer.appendChild(b);
+  };
+
+  if (!q) addNavItem('all', 'All Files', totalFiles);
+  directoryData.folders.forEach(f => {
+    if (!q || f.name.toLowerCase().includes(q)) addNavItem(f.id, f.name, f.items.length);
+  });
+}
+
+function renderThread() {
+  const q = $('cardSearch').value.toLowerCase();
+  const thread = $('thread');
+  let count = 0;
+  
+  const folders = directoryData.folders.filter(f => active === 'all' || f.id === active);
+  $('convTitle').textContent = active === 'all' ? directoryData.name : folders[0].name;
+  thread.innerHTML = '';
+
+  folders.forEach(f => {
+    f.items.forEach(item => {
+      if (q && !item.name.toLowerCase().includes(q)) return;
+      count++;
+      const a = document.createElement('a');
+      a.className = 'msg';
+      a.href = item.url;
+      a.innerHTML = `
+        <div class="msg-info">
+          <div>📄</div>
+          <div>
+            <h3 class="ct">${item.name}</h3>
+            <span class="sub">${item.url}</span>
+          </div>
+        </div>
+        <span class="pill">${item.size}</span>
+      `;
+      thread.appendChild(a);
+    });
+  });
+
+  if (!count) thread.innerHTML = '<div class="placeholder">No files found.</div>';
+  $('msgCount').textContent = `${count} items`;
+}
+
+function render() { renderList(); renderThread(); }
+
+$('listSearch').oninput = renderList;
+$('cardSearch').oninput = renderThread;
+$('back-list').onclick = () => $('app').classList.remove('reading');
+
+// Theme Switcher
+const root = document.documentElement;
+$('themeBtn').onclick = () => {
+  const dark = root.getAttribute('data-theme') === 'dark';
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+};
+
+render();
+</script>
+
+</body>
+</html>

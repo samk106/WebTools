@@ -1,0 +1,212 @@
+{
+  "app": "cab-economics",
+  "version": 1,
+  "G": 200,
+  "vehicles": [
+    {
+      "name": "S-Presso",
+      "price": 600000,
+      "down": 15,
+      "rate": 10,
+      "ten": 60,
+      "resale": 150000,
+      "fd": 7,
+      "tariff": 11,
+      "days": 25,
+      "cng": 97,
+      "mil": 28,
+      "intv": 10000,
+      "svc": 7000,
+      "ov": 150,
+      "c": 0,
+      "ovOn": false,
+      "fuelUnit": "kg",
+      "wear": [
+        {
+          "n": "Tyres & battery set",
+          "c": 18000,
+          "km": 50000
+        },
+        {
+          "n": "Shocks & clutch overhaul",
+          "c": 20000,
+          "km": 100000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Commercial insurance",
+          "a": 18000
+        },
+        {
+          "n": "Permit & fitness passing",
+          "a": 4000
+        }
+      ]
+    },
+    {
+      "name": "WagonR",
+      "price": 700000,
+      "down": 15,
+      "rate": 10,
+      "ten": 60,
+      "resale": 150000,
+      "fd": 7,
+      "tariff": 11,
+      "days": 25,
+      "cng": 97,
+      "mil": 28,
+      "intv": 10000,
+      "svc": 7000,
+      "ov": 150,
+      "c": 1,
+      "ovOn": false,
+      "fuelUnit": "kg",
+      "wear": [
+        {
+          "n": "Tyres & battery set",
+          "c": 18000,
+          "km": 50000
+        },
+        {
+          "n": "Shocks & clutch overhaul",
+          "c": 20000,
+          "km": 100000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Commercial insurance",
+          "a": 18000
+        },
+        {
+          "n": "Permit & fitness passing",
+          "a": 4000
+        }
+      ]
+    },
+    {
+      "name": "S-Presso - NO LOAN",
+      "price": 600000,
+      "down": 100,
+      "rate": 10,
+      "ten": 60,
+      "resale": 150000,
+      "fd": 7,
+      "tariff": 11,
+      "days": 25,
+      "cng": 97,
+      "mil": 28,
+      "intv": 10000,
+      "svc": 7000,
+      "ov": 150,
+      "c": 3,
+      "ovOn": false,
+      "fuelUnit": "kg",
+      "wear": [
+        {
+          "n": "Tyres & battery set",
+          "c": 18000,
+          "km": 50000
+        },
+        {
+          "n": "Shocks & clutch overhaul",
+          "c": 20000,
+          "km": 100000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Commercial insurance",
+          "a": 18000
+        },
+        {
+          "n": "Permit & fitness passing",
+          "a": 4000
+        }
+      ]
+    },
+    {
+      "name": "WagonR - NO LOAN",
+      "price": 700000,
+      "down": 100,
+      "rate": 10,
+      "ten": 60,
+      "resale": 150000,
+      "fd": 7,
+      "tariff": 11,
+      "days": 25,
+      "cng": 97,
+      "mil": 28,
+      "intv": 10000,
+      "svc": 7000,
+      "ov": 150,
+      "c": 4,
+      "ovOn": false,
+      "fuelUnit": "kg",
+      "wear": [
+        {
+          "n": "Tyres & battery set",
+          "c": 18000,
+          "km": 50000
+        },
+        {
+          "n": "Shocks & clutch overhaul",
+          "c": 20000,
+          "km": 100000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Commercial insurance",
+          "a": 18000
+        },
+        {
+          "n": "Permit & fitness passing",
+          "a": 4000
+        }
+      ]
+    },
+    {
+      "name": "Splendor bike",
+      "price": 100000,
+      "down": 15,
+      "rate": 12,
+      "ten": 36,
+      "resale": 25000,
+      "fd": 7,
+      "tariff": 7,
+      "days": 26,
+      "cng": 105,
+      "mil": 50,
+      "intv": 3000,
+      "svc": 1500,
+      "ov": 120,
+      "c": 2,
+      "ovOn": false,
+      "fuelUnit": "ltr",
+      "wear": [
+        {
+          "n": "Tyres & chain set",
+          "c": 4000,
+          "km": 20000
+        },
+        {
+          "n": "Battery & clutch plates",
+          "c": 2500,
+          "km": 30000
+        }
+      ],
+      "fixed": [
+        {
+          "n": "Insurance",
+          "a": 3000
+        },
+        {
+          "n": "Registration & PUC",
+          "a": 1000
+        }
+      ]
+    }
+  ]
+}
